@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickPeg Retailer Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --charcoal:#1A1815;
+    --amber:#C77D34;
+    --amber-soft:#E0A868;
+    --olive:#8A7B4F;
+    --cream:#F2EEE6;
+    --bottle:#2B3A2E;
+    --bottle-soft:#4C5F4F;
+    --line:#E3DDCE;
+    --line-dark:#D8D0BC;
+    --red:#B5321C;
+    --white:#FFFFFF;
+  }
+  *{ box-sizing: border-box; margin: 0; padding: 0; }
+  body{
+    font-family: 'Manrope', sans-serif;
+    background: var(--cream);
+    color: var(--charcoal);
+    min-height: 100vh;
+  }
+  h1,h2,h3{ font-family: 'Fraunces', serif; font-weight: 600; }
+  a{ text-decoration: none; color: inherit; }
+  button{ font-family: inherit; cursor: pointer; border: none; background: none; }
+
+  /* ===== LOGIN SCREEN ===== */
+  .login-wrap{ min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .login-card{ background: var(--white); width: 100%; max-width: 400px; padding: 40px 32px; border-radius: 4px; border: 1px solid var(--line-dark); }
+  .login-logo{ font-size: 24px; font-weight: 700; color: var(--charcoal); margin-bottom: 4px; }
+  .login-logo span{ color: var(--amber); }
+  .login-sub{ font-size: 13px; color: var(--olive); margin-bottom: 28px; letter-spacing: 0.02em; }
+  .field{ margin-bottom: 16px; }
+  .field label{ display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 6px; color: var(--charcoal); }
+  .field input{ width: 100%; padding: 12px 14px; border: 1px solid var(--line-dark); border-radius: 3px; font-size: 15px; font-family: inherit; background: var(--cream); }
+  .field input:focus{ outline: none; border-color: var(--amber); background: var(--white); }
+  .btn-primary{ width: 100%; background: var(--charcoal); color: var(--cream); padding: 13px; border-radius: 3px; font-size: 15px; font-weight: 600; margin-top: 8px; transition: background 0.15s; }
+  .btn-primary:hover{ background: var(--bottle); }
+  .login-foot{ font-size: 12.5px; color: var(--olive); margin-top: 18px; text-align: center; }
+  .demo-note{ font-size: 11.5px; color: var(--olive); background: var(--cream); border: 1px dashed var(--line-dark); padding: 8px 10px; border-radius: 3px; margin-top: 18px; line-height: 1.5; }
+
+  /* ===== APP SHELL ===== */
+  .app-shell{ display: none; min-height: 100vh; }
+  .app-shell.show{ display: flex; }
+
+  .sidebar{ width: 220px; flex-shrink: 0; background: var(--charcoal); color: var(--cream); min-height: 100vh; display: flex; flex-direction: column; padding: 24px 0; position: sticky; top: 0; height: 100vh; }
+  .sidebar-logo{ font-size: 19px; font-weight: 700; padding: 0 24px; margin-bottom: 4px; }
+  .sidebar-logo span{ color: var(--amber-soft); }
+  .sidebar-shop{ font-size: 12px; color: #B8AF9E; padding: 0 24px; margin-bottom: 28px; }
+  .nav-item{ display: flex; align-items: center; gap: 10px; padding: 12px 24px; font-size: 14px; font-weight: 500; color: #C9C2B2; border-left: 3px solid transparent; transition: all 0.15s; }
+  .nav-item svg{ width: 18px; height: 18px; flex-shrink: 0; }
+  .nav-item:hover{ color: var(--cream); background: rgba(255,255,255,0.04); }
+  .nav-item.active{ color: var(--white); border-left-color: var(--amber-soft); background: rgba(255,255,255,0.06); }
+  .nav-badge{ background: var(--amber); color: var(--charcoal); font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 10px; margin-left: auto; }
+  .sidebar-foot{ margin-top: auto; padding: 16px 24px 0; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px; }
+  .logout-btn{ font-size: 13px; color: #B8AF9E; }
+  .logout-btn:hover{ color: var(--cream); }
+
+  .main{ flex: 1; min-width: 0; }
+  .topbar{ background: var(--white); border-bottom: 1px solid var(--line-dark); padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .topbar h2{ font-size: 21px; }
+  .topbar-meta{ font-size: 13px; color: var(--olive); }
+  .content{ padding: 28px 32px 60px; max-width: 1100px; }
+
+  .store-toggle{ display: flex; align-items: center; gap: 10px; background: var(--white); border: 1px solid var(--line-dark); padding: 6px 8px 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+  .switch{ width: 38px; height: 21px; border-radius: 12px; background: var(--bottle); position: relative; transition: background 0.2s; }
+  .switch.off{ background: #C9C2B2; }
+  .switch::after{ content:''; position: absolute; top: 2px; left: 19px; width: 17px; height: 17px; border-radius: 50%; background: var(--white); transition: left 0.2s; }
+  .switch.off::after{ left: 2px; }
+
+  /* stat cards */
+  .stat-grid{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+  .stat-card{ background: var(--white); border: 1px solid var(--line-dark); border-radius: 4px; padding: 16px 18px; }
+  .stat-label{ font-size: 12px; color: var(--olive); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 8px; }
+  .stat-value{ font-family: 'Fraunces', serif; font-size: 26px; font-weight: 600; }
+  .stat-sub{ font-size: 12px; color: var(--bottle-soft); margin-top: 4px; font-weight: 600; }
+
+  /* ===== ORDERS ===== */
+  .order-tabs{ display: flex; gap: 6px; margin-bottom: 20px; border-bottom: 1px solid var(--line-dark); }
+  .order-tab{ padding: 10px 16px; font-size: 13.5px; font-weight: 600; color: var(--olive); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .order-tab.active{ color: var(--charcoal); border-bottom-color: var(--amber); }
+
+  .order-card{ background: var(--white); border: 1px solid var(--line-dark); border-radius: 4px; padding: 18px 20px; margin-bottom: 12px; }
+  .order-top{ display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .order-id{ font-weight: 700; font-size: 15px; }
+  .order-time{ font-size: 12px; color: var(--olive); margin-top: 2px; }
+  .order-status{ font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; padding: 4px 10px; border-radius: 12px; }
+  .status-new{ background: #FBE8D8; color: var(--amber); }
+  .status-preparing{ background: #E8E4D0; color: var(--olive); }
+  .status-ready{ background: #DCE8DD; color: var(--bottle); }
+  .status-done{ background: #E9E5DC; color: #9A9280; }
+  .order-items{ font-size: 13.5px; color: var(--charcoal); line-height: 1.7; margin-bottom: 12px; padding: 10px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .order-items div{ display: flex; justify-content: space-between; }
+  .order-total-row{ display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; margin-bottom: 14px; }
+  .order-actions{ display: flex; gap: 8px; }
+  .btn-accept{ background: var(--bottle); color: var(--cream); padding: 9px 18px; border-radius: 3px; font-size: 13.5px; font-weight: 600; }
+  .btn-reject{ background: transparent; color: var(--red); border: 1px solid var(--red); padding: 9px 18px; border-radius: 3px; font-size: 13.5px; font-weight: 600; }
+  .btn-advance{ background: var(--amber); color: var(--charcoal); padding: 9px 18px; border-radius: 3px; font-size: 13.5px; font-weight: 600; }
+  .btn-ghost{ background: transparent; color: var(--olive); padding: 9px 14px; font-size: 13px; font-weight: 600; }
+  .empty-note{ font-size: 14px; color: var(--olive); text-align: center; padding: 40px 0; }
+
+  /* ===== PRODUCTS ===== */
+  .prod-toolbar{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .btn-add{ background: var(--charcoal); color: var(--cream); padding: 10px 18px; border-radius: 3px; font-size: 13.5px; font-weight: 600; }
+  .prod-table{ width: 100%; background: var(--white); border: 1px solid var(--line-dark); border-radius: 4px; border-collapse: collapse; overflow: hidden; }
+  .prod-table th{ text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.03em; color: var(--olive); padding: 12px 16px; border-bottom: 1px solid var(--line-dark); }
+  .prod-table td{ padding: 12px 16px; font-size: 14px; border-bottom: 1px solid var(--line); }
+  .prod-table tr:last-child td{ border-bottom: none; }
+  .stock-pill{ font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 10px; }
+  .stock-in{ background: #DCE8DD; color: var(--bottle); }
+  .stock-out{ background: #F5DCD5; color: var(--red); }
+  .price-input{ width: 70px; padding: 5px 8px; border: 1px solid var(--line-dark); border-radius: 3px; font-family: inherit; font-size: 13.5px; }
+  .icon-btn{ color: var(--olive); padding: 4px 8px; font-size: 13px; font-weight: 600; }
+  .icon-btn:hover{ color: var(--charcoal); }
+
+  /* ===== EARNINGS ===== */
+  .payout-card{ background: var(--white); border: 1px solid var(--line-dark); border-radius: 4px; padding: 22px; margin-bottom: 20px; }
+  .payout-row{ display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .payout-row:last-child{ border-bottom: none; font-weight: 700; font-size: 15px; padding-top: 14px; }
+  .commission-note{ font-size: 12.5px; color: var(--olive); margin-top: 6px; }
+
+  @media (max-width: 800px){
+    .app-shell.show{ flex-direction: column; }
+    .sidebar{ width: 100%; height: auto; position: relative; flex-direction: row; overflow-x: auto; padding: 12px 0; }
+    .sidebar-logo, .sidebar-shop, .sidebar-foot{ display: none; }
+    .nav-item{ padding: 10px 16px; border-left: none; border-bottom: 3px solid transparent; white-space: nowrap; }
+    .nav-item.active{ border-left: none; border-bottom-color: var(--amber-soft); }
+    .stat-grid{ grid-template-columns: repeat(2, 1fr); }
+    .content{ padding: 20px 16px 60px; }
+    .topbar{ padding: 14px 16px; }
+    .prod-table{ font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ================= LOGIN SCREEN ================= -->
+  <div class="login-wrap" id="loginScreen">
+    <div class="login-card">
+      <div class="login-logo">Quick<span>Peg</span></div>
+      <div class="login-sub">RETAILER PARTNER LOGIN</div>
+      <div class="field">
+        <label>Shop registered mobile number</label>
+        <input type="tel" id="loginPhone" placeholder="98765 43210" maxlength="10">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="loginPass" placeholder="••••••••">
+      </div>
+      <button class="btn-primary" onclick="doLogin()">Log in</button>
+      <div class="login-foot" id="loginError" style="display:none; color:#A8462F;"></div>
+      <div class="login-foot">New retailer partner? Contact QuickPeg team to get onboarded.</div>
+      <div class="demo-note">Demo mode: any phone number and password will log you in as "The Vintage Cellar, Civil Lines, Rudrapur."</div>
+    </div>
+  </div>
+
+  <!-- ================= APP SHELL ================= -->
+  <div class="app-shell" id="appShell">
+    <div class="sidebar">
+      <div class="sidebar-logo">Quick<span>Peg</span></div>
+      <div class="sidebar-shop">The Vintage Cellar<br>Civil Lines, Rudrapur</div>
+      <div class="nav-item active" data-view="orders" onclick="selectNav(this,'orders')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 21V9"/></svg>
+        Orders
+        <span class="nav-badge" id="navOrderBadge">2</span>
+      </div>
+      <div class="nav-item" data-view="products" onclick="selectNav(this,'products')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7 12 3 4 7v10l8 4 8-4V7Z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg>
+        Products
+      </div>
+      <div class="nav-item" data-view="earnings" onclick="selectNav(this,'earnings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Earnings
+      </div>
+      <div class="nav-item" data-view="settings" onclick="selectNav(this,'settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Store settings
+      </div>
+      <div class="sidebar-foot">
+        <button class="logout-btn" onclick="doLogout()">Log out</button>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="topbar">
+        <h2 id="viewTitle">Today's orders</h2>
+        <div class="store-toggle">
+          <span id="storeToggleLabel">Store open</span>
+          <div class="switch" id="storeSwitch" onclick="toggleStore()"></div>
+        </div>
+      </div>
+      <div class="content" id="viewContent"></div>
+    </div>
+  </div>
+
+<script>
+  // ===== Backend connection =====
+  const API_BASE = 'https://quickpeg-backend.onrender.com';
+  let ws = null;
+  let retailerId = null;
+
+  async function api(method, path, body){
+    const res = await fetch(API_BASE + path, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok){ throw new Error(data.error || 'Request failed'); }
+    return data;
+  }
+
+  function connectSocket(){
+    try{
+      ws = new WebSocket(API_BASE.replace('http','ws'));
+      ws.onopen = () => ws.send(JSON.stringify({ type: 'subscribe', channel: 'retailer:' + retailerId }));
+      ws.onmessage = (evt) => {
+        const msg = JSON.parse(evt.data);
+        if(msg.type === 'new_order' || msg.type === 'order_update'){
+          loadOrders();
+        }
+      };
+    } catch(e){ console.warn('WebSocket unavailable', e); }
+  }
+
+  // ===== Auth =====
+  async function doLogin(){
+    const phone = document.getElementById('loginPhone').value || '9876543210';
+    const password = document.getElementById('loginPass').value || 'demo123';
+    const errEl = document.getElementById('loginError');
+    try{
+      const data = await api('POST', '/api/retailer/login', { phone, password });
+      retailerId = data.retailer.id;
+      document.querySelector('.sidebar-shop').innerHTML = `${data.retailer.name}<br>${data.retailer.address || ''}`;
+      storeOpen = !!data.retailer.is_open;
+      document.getElementById('storeSwitch').classList.toggle('off', !storeOpen);
+      document.getElementById('storeToggleLabel').textContent = storeOpen ? 'Store open' : 'Store closed';
+
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appShell').classList.add('show');
+      connectSocket();
+      await Promise.all([loadOrders(), loadProducts()]);
+      renderView('orders');
+    } catch(e){
+      if(errEl){ errEl.textContent = e.message; errEl.style.display = 'block'; }
+      else alert('Login failed: ' + e.message);
+    }
+  }
+  function doLogout(){
+    document.getElementById('appShell').classList.remove('show');
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('loginPhone').value = '';
+    document.getElementById('loginPass').value = '';
+    if(ws) ws.close();
+  }
+
+  // ===== Nav =====
+  const viewTitles = { orders: "Today's orders", products: "Product & price list", earnings: "Earnings & payouts", settings: "Store settings" };
+  function selectNav(el, view){
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('viewTitle').textContent = viewTitles[view];
+    renderView(view);
+  }
+
+  // ===== Store open/closed toggle -- persisted to the backend =====
+  let storeOpen = true;
+  async function toggleStore(){
+    storeOpen = !storeOpen;
+    const sw = document.getElementById('storeSwitch');
+    const label = document.getElementById('storeToggleLabel');
+    sw.classList.toggle('off', !storeOpen);
+    label.textContent = storeOpen ? 'Store open' : 'Store closed';
+    try{
+      await api('PATCH', `/api/retailers/${retailerId}`, { is_open: storeOpen });
+    } catch(e){ console.warn('Could not update store status', e); }
+  }
+
+  // ===== Orders data -- loaded live from the backend, updated in real time =====
+  let orders = [];
+  let orderTab = 'active';
+
+  async function loadOrders(){
+    try{
+      const data = await api('GET', `/api/retailers/${retailerId}/orders`);
+      orders = data.orders;
+    } catch(e){
+      console.warn('Could not load orders', e);
+    }
+    document.getElementById('viewContent').innerHTML = renderOrders();
+  }
+
+  function updateOrderBadge(){
+    const n = orders.filter(o => o.status === 'placed').length;
+    const badge = document.getElementById('navOrderBadge');
+    if(n > 0){ badge.style.display = 'inline-block'; badge.textContent = n; }
+    else { badge.style.display = 'none'; }
+  }
+
+  async function setOrderStatus(id, status){
+    try{
+      await api('PATCH', `/api/orders/${id}/status`, { status });
+      await loadOrders();
+    } catch(e){ alert('Could not update order: ' + e.message); }
+  }
+
+  function acceptOrder(id){ setOrderStatus(id, 'accepted'); }
+  function rejectOrder(id){ setOrderStatus(id, 'rejected'); }
+  function advanceOrder(id, currentStatus){
+    if(currentStatus === 'accepted') setOrderStatus(id, 'preparing');
+    else if(currentStatus === 'preparing') setOrderStatus(id, 'ready');
+  }
+
+  function statusLabel(s){
+    return {
+      placed: 'New order', accepted: 'Accepted', preparing: 'Preparing',
+      ready: 'Ready for pickup', picked_up: 'With rider', delivered: 'Completed',
+      rejected: 'Rejected', cancelled: 'Cancelled'
+    }[s] || s;
+  }
+
+  function timeAgo(iso){
+    const diffMs = Date.now() - new Date(iso.replace(' ', 'T') + 'Z').getTime();
+    const mins = Math.round(diffMs / 60000);
+    if(mins < 1) return 'Just now';
+    if(mins < 60) return mins + ' min ago';
+    const hrs = Math.round(mins / 60);
+    return hrs + ' hr ago';
+  }
+
+  function orderCardHTML(o){
+    const items = JSON.parse(o.items_json);
+    const itemsHTML = items.map(i => `<div><span>${i.name} x${i.qty}</span><span>₹${i.price * i.qty}</span></div>`).join('');
+    let actions = '';
+    if(o.status === 'placed'){
+      actions = `<button class="btn-accept" onclick="acceptOrder('${o.id}')">Accept order</button><button class="btn-reject" onclick="rejectOrder('${o.id}')">Reject</button>`;
+    } else if(o.status === 'accepted'){
+      actions = `<button class="btn-advance" onclick="advanceOrder('${o.id}','accepted')">Start preparing</button>`;
+    } else if(o.status === 'preparing'){
+      actions = `<button class="btn-advance" onclick="advanceOrder('${o.id}','preparing')">Mark ready for pickup</button>`;
+    } else if(o.status === 'ready'){
+      actions = `<span style="font-size:12.5px;color:var(--olive);">Waiting for a rider to accept this job</span>`;
+    } else if(o.status === 'picked_up'){
+      actions = `<span style="font-size:12.5px;color:var(--olive);">With rider — on the way to customer</span>`;
+    } else {
+      actions = `<span style="font-size:12.5px;color:var(--olive);">No further action needed</span>`;
+    }
+    return `
+      <div class="order-card">
+        <div class="order-top">
+          <div>
+            <div class="order-id">Order #${o.order_number}</div>
+            <div class="order-time">${timeAgo(o.created_at)}</div>
+          </div>
+          <div class="order-status status-${o.status}">${statusLabel(o.status)}</div>
+        </div>
+        <div class="order-items">${itemsHTML}</div>
+        <div class="order-total-row"><span>Total</span><span>₹${o.total}</span></div>
+        <div class="order-actions">${actions}</div>
+      </div>
+    `;
+  }
+
+  function selectOrderTab(el, tab){
+    orderTab = tab;
+    document.getElementById('viewContent').innerHTML = renderOrders();
+    updateOrderBadge();
+  }
+
+  function renderOrders(){
+    updateOrderBadge();
+    const doneStatuses = ['delivered', 'rejected', 'cancelled'];
+    const list = orderTab === 'active'
+      ? orders.filter(o => !doneStatuses.includes(o.status))
+      : orders.filter(o => doneStatuses.includes(o.status));
+    const listHTML = list.length
+      ? list.map(orderCardHTML).join('')
+      : `<div class="empty-note">No ${orderTab === 'active' ? 'active' : 'completed'} orders right now.</div>`;
+    return `
+      <div class="order-tabs">
+        <div class="order-tab ${orderTab==='active'?'active':''}" onclick="selectOrderTab(this,'active')">Active</div>
+        <div class="order-tab ${orderTab==='done'?'active':''}" onclick="selectOrderTab(this,'done')">Completed</div>
+      </div>
+      ${listHTML}
+    `;
+  }
+
+  // ===== Products data -- loaded live from the backend, edits saved for real =====
+  let shopProducts = [];
+
+  async function loadProducts(){
+    try{
+      const data = await api('GET', `/api/retailers/${retailerId}/products`);
+      shopProducts = data.products;
+    } catch(e){
+      console.warn('Could not load products', e);
+    }
+  }
+
+  async function toggleStock(id){
+    const p = shopProducts.find(x => x.id === id);
+    if(!p) return;
+    p.in_stock = p.in_stock ? 0 : 1;
+    document.getElementById('viewContent').innerHTML = renderProductsView();
+    try{ await api('PATCH', `/api/products/${id}`, { in_stock: !!p.in_stock }); }
+    catch(e){ console.warn('Could not save stock change', e); }
+  }
+
+  async function updatePrice(id, val){
+    const p = shopProducts.find(x => x.id === id);
+    const price = parseInt(val) || (p ? p.price : 0);
+    if(p) p.price = price;
+    try{ await api('PATCH', `/api/products/${id}`, { price }); }
+    catch(e){ console.warn('Could not save price change', e); }
+  }
+
+  async function removeProduct(id){
+    shopProducts = shopProducts.filter(x => x.id !== id);
+    document.getElementById('viewContent').innerHTML = renderProductsView();
+    try{ await api('DELETE', `/api/products/${id}`); }
+    catch(e){ console.warn('Could not delete product', e); }
+  }
+
+  async function addProductPrompt(){
+    const name = prompt('Product name:');
+    if(!name) return;
+    const price = parseInt(prompt('Price (rupees):')) || 0;
+    const category = prompt('Category (Beer, Wine, Spirits, or Mixers):') || 'Beer';
+    try{
+      const res = await api('POST', `/api/retailers/${retailerId}/products`, { name, price, category, kind: 'bottle' });
+      shopProducts.push({ id: res.id, name, category, price, in_stock: 1, kind: 'bottle' });
+      document.getElementById('viewContent').innerHTML = renderProductsView();
+    } catch(e){ alert('Could not add product: ' + e.message); }
+  }
+
+  function renderProductsView(){
+    const rows = shopProducts.map(p => `
+      <tr>
+        <td>${p.name}<br><span style="color:var(--olive);font-size:12px;">${p.category}</span></td>
+        <td>₹<input class="price-input" type="number" value="${p.price}" onchange="updatePrice('${p.id}', this.value)"></td>
+        <td><span class="stock-pill ${p.in_stock ? 'stock-in' : 'stock-out'}" style="cursor:pointer;" onclick="toggleStock('${p.id}')">${p.in_stock ? 'In stock' : 'Out of stock'}</span></td>
+        <td><button class="icon-btn" onclick="removeProduct('${p.id}')">Remove</button></td>
+      </tr>
+    `).join('');
+    return `
+      <div class="prod-toolbar">
+        <div style="font-size:13.5px;color:var(--olive);">${shopProducts.length} products listed</div>
+        <button class="btn-add" onclick="addProductPrompt()">+ Add product</button>
+      </div>
+      <table class="prod-table">
+        <thead><tr><th>Product</th><th>Price</th><th>Availability</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+
+  // ===== Earnings view -- computed live from real delivered orders =====
+  let earningsCache = null;
+
+  async function loadEarnings(){
+    try{
+      earningsCache = await api('GET', `/api/retailers/${retailerId}/earnings`);
+    } catch(e){
+      console.warn('Could not load earnings', e);
+      earningsCache = null;
+    }
+  }
+
+  function renderEarningsView(){
+    if(!earningsCache){
+      return `<div class="empty-note">Loading earnings…</div>`;
+    }
+    const { today, week, payout } = earningsCache;
+    return `
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">Today's orders</div><div class="stat-value">${today.orders}</div></div>
+        <div class="stat-card"><div class="stat-label">Today's revenue</div><div class="stat-value">₹${today.revenue.toLocaleString('en-IN')}</div><div class="stat-sub">Gross, before commission</div></div>
+        <div class="stat-card"><div class="stat-label">This week</div><div class="stat-value">₹${week.revenue.toLocaleString('en-IN')}</div><div class="stat-sub">${week.orders} orders</div></div>
+        <div class="stat-card"><div class="stat-label">Avg order value</div><div class="stat-value">₹${week.avgOrderValue}</div></div>
+      </div>
+      <div class="payout-card">
+        <h3 style="font-size:16px;margin-bottom:14px;">This week's payout summary</h3>
+        <div class="payout-row"><span>Gross sales</span><span>₹${week.revenue.toLocaleString('en-IN')}</span></div>
+        <div class="payout-row"><span>QuickPeg commission (${payout.commissionPct}%)</span><span>−₹${payout.commission.toLocaleString('en-IN')}</span></div>
+        <div class="payout-row"><span>Net payout</span><span>₹${payout.netPayout.toLocaleString('en-IN')}</span></div>
+        <div class="commission-note">Payouts are transferred to your registered bank account every Monday for the previous week's sales.</div>
+      </div>
+    `;
+  }
+
+  // ===== Settings view -- saves for real now =====
+  let currentRetailer = null;
+
+  function renderSettingsView(){
+    const r = currentRetailer || {};
+    return `
+      <div class="payout-card">
+        <h3 style="font-size:16px;margin-bottom:14px;">Store details</h3>
+        <div class="field"><label>Shop name</label><input id="settingName" value="${r.name || ''}"></div>
+        <div class="field"><label>Address</label><input id="settingAddress" value="${r.address || ''}"></div>
+        <div class="field"><label>Excise license number</label><input id="settingLicense" value="${r.excise_license || ''}"></div>
+        <div class="field"><label>Payout bank account</label><input value="•••• •••• 4821" disabled></div>
+        <button class="btn-primary" style="width:auto;padding:11px 24px;" onclick="saveSettings()">Save changes</button>
+        <div class="demo-note" id="settingsSavedNote" style="display:none;">Saved.</div>
+      </div>
+    `;
+  }
+
+  async function saveSettings(){
+    const name = document.getElementById('settingName').value;
+    const address = document.getElementById('settingAddress').value;
+    const excise_license = document.getElementById('settingLicense').value;
+    try{
+      const data = await api('PATCH', `/api/retailers/${retailerId}`, { name, address, excise_license });
+      currentRetailer = data.retailer;
+      document.querySelector('.sidebar-shop').innerHTML = `${data.retailer.name}<br>${data.retailer.address || ''}`;
+      const note = document.getElementById('settingsSavedNote');
+      note.style.display = 'block';
+      setTimeout(() => note.style.display = 'none', 2000);
+    } catch(e){ alert('Could not save: ' + e.message); }
+  }
+
+  // ===== Master dispatcher =====
+  async function renderView(view){
+    const el = document.getElementById('viewContent');
+    if(view === 'orders'){ await loadOrders(); }
+    else if(view === 'products'){ await loadProducts(); el.innerHTML = renderProductsView(); }
+    else if(view === 'earnings'){ await loadEarnings(); el.innerHTML = renderEarningsView(); }
+    else if(view === 'settings'){
+      if(!currentRetailer){
+        try{ const d = await api('GET', `/api/retailers/${retailerId}`); currentRetailer = d.retailer; } catch(e){}
+      }
+      el.innerHTML = renderSettingsView();
+    }
+    updateOrderBadge();
+  }
+</script>
+</body>
+</html>

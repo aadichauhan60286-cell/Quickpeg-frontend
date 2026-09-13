@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickPeg — Delivered fast, delivered right</title>
+<style>
+
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700&display=swap');
+
+  :root{
+    --charcoal: #1A1815;
+    --charcoal-soft: #26221D;
+    --amber: #C77D34;
+    --amber-soft: #E0A868;
+    --olive: #8A7B4F;
+    --cream: #F2EEE6;
+    --bottle: #2B3A2E;
+    --bottle-soft: #3A4D3E;
+    --line: rgba(242,238,230,0.14);
+    --line-dark: rgba(26,24,21,0.12);
+    --danger: #A8462F;
+  }
+
+  *{ box-sizing: border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background: var(--cream);
+    color: var(--charcoal);
+    font-family: 'Manrope', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, .display{
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--charcoal);
+  }
+
+  a{ color: inherit; text-decoration: none; }
+  button{ font-family: inherit; cursor: pointer; border: none; background: none; }
+  input{ font-family: inherit; }
+
+  .screen{ display: none; min-height: 100vh; }
+  .screen.active{ display: block; }
+
+  /* ===== Age Gate ===== */
+  .age-gate{
+    position: fixed; inset: 0; background: rgba(26,24,21,0.92);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 200; padding: 24px;
+  }
+  .age-gate.hidden{ display: none; }
+  .age-card{
+    background: var(--cream); max-width: 380px; width: 100%;
+    padding: 36px 28px; border-radius: 2px; border-top: 3px solid var(--amber);
+  }
+  .age-card h2{ font-size: 26px; margin-bottom: 10px; }
+  .age-card p{ font-size: 14px; opacity: 0.7; margin-bottom: 24px; }
+  .age-buttons{ display: flex; gap: 12px; }
+  .age-btn{ flex: 1; padding: 13px 0; font-size: 14px; font-weight: 600; border-radius: 2px; transition: opacity 0.15s; }
+  .age-btn.yes{ background: var(--charcoal); color: var(--cream); }
+  .age-btn.no{ background: transparent; border: 1px solid var(--line-dark); }
+  .age-btn:hover{ opacity: 0.85; }
+  .age-fine{ font-size: 11px; opacity: 0.5; margin-top: 16px; }
+
+  /* ===== Header ===== */
+  header{ background: var(--charcoal); color: var(--cream); padding: 16px 20px; position: sticky; top: 0; z-index: 20; }
+  .header-row{ display: flex; align-items: center; justify-content: space-between; max-width: 1100px; margin: 0 auto; gap: 12px; }
+  .logo{ font-family: 'Fraunces', serif; font-weight: 700; font-size: 22px; color: var(--cream); display: flex; align-items: baseline; gap: 2px; }
+  .logo .dot{ color: var(--amber); }
+  .header-right{ display: flex; align-items: center; gap: 14px; }
+  .location-pill{ display: flex; align-items: center; gap: 6px; font-size: 13px; opacity: 0.85; border: 1px solid var(--line); padding: 7px 12px; border-radius: 20px; white-space: nowrap; }
+  .location-pill svg{ width: 13px; height: 13px; flex-shrink: 0; }
+  .icon-btn{ position: relative; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+  .icon-btn:hover{ background: rgba(242,238,230,0.08); }
+  .icon-btn svg{ width: 19px; height: 19px; color: var(--cream); }
+  .cart-badge{ position: absolute; top: 2px; right: 2px; background: var(--amber); color: var(--charcoal); font-size: 10px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .cart-badge.hidden{ display: none; }
+  .login-btn{ font-size: 13px; font-weight: 600; color: var(--charcoal); background: var(--amber-soft); padding: 8px 16px; border-radius: 20px; white-space: nowrap; }
+  .back-btn{ display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--cream); opacity: 0.85; }
+  .back-btn svg{ width: 16px; height: 16px; }
+
+  /* ===== Hero ===== */
+  .hero{ background: var(--charcoal); color: var(--cream); padding: 40px 20px 56px; }
+  .hero-inner{ max-width: 1100px; margin: 0 auto; }
+  .hero-eyebrow{ font-size: 13px; color: var(--amber-soft); font-weight: 600; margin-bottom: 14px; }
+  .hero h1{ font-size: 34px; line-height: 1.1; max-width: 480px; margin-bottom: 16px; }
+  .hero p{ font-size: 15px; opacity: 0.75; max-width: 400px; margin-bottom: 28px; }
+
+  .search-box{ background: var(--cream); border-radius: 3px; padding: 4px; display: flex; align-items: center; max-width: 480px; box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
+  .search-box svg{ width: 18px; height: 18px; margin: 0 10px; flex-shrink: 0; opacity: 0.5; }
+  .search-box input{ border: none; background: none; flex: 1; padding: 13px 4px; font-size: 14px; color: var(--charcoal); outline: none; }
+  .search-box button{ background: var(--charcoal); color: var(--cream); font-size: 13px; font-weight: 600; padding: 12px 20px; border-radius: 2px; }
+
+  /* ===== Categories ===== */
+  .categories{ padding: 24px 20px 8px; max-width: 1100px; margin: 0 auto; }
+  .cat-scroll{ display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; }
+  .cat-scroll::-webkit-scrollbar{ display: none; }
+  .cat-pill{ flex-shrink: 0; display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 20px; border: 1px solid var(--line-dark); font-size: 13px; font-weight: 600; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+  .cat-pill.active{ background: var(--charcoal); color: var(--cream); border-color: var(--charcoal); }
+  .cat-pill:not(.active):hover{ border-color: var(--amber); }
+
+  /* ===== Section ===== */
+  .section{ max-width: 1100px; margin: 0 auto; padding: 36px 20px; }
+  .section-head{ display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px; border-bottom: 1px solid var(--line-dark); padding-bottom: 14px; }
+  .section-head h2{ font-size: 21px; }
+  .section-head .count{ font-size: 12px; opacity: 0.5; }
+
+  /* ===== Retailer cards ===== */
+  .retailer-grid{ display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+  .retailer-card{ border: 1px solid var(--line-dark); border-radius: 2px; overflow: hidden; transition: border-color 0.15s; }
+  .retailer-card:hover{ border-color: var(--olive); }
+  .retailer-img{ height: 110px; background: linear-gradient(135deg, var(--bottle), var(--charcoal)); display: flex; align-items: center; justify-content: center; color: var(--amber-soft); font-family: 'Fraunces', serif; font-size: 15px; font-weight: 600; position: relative; text-align: center; padding: 0 16px; }
+  .retailer-img .badge{ position: absolute; top: 10px; right: 10px; background: var(--cream); color: var(--charcoal); font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 2px; }
+  .retailer-body{ padding: 14px 16px 16px; }
+  .retailer-name{ font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .retailer-meta{ display: flex; align-items: center; gap: 10px; font-size: 12.5px; opacity: 0.65; margin-top: 8px; }
+  .retailer-meta .rating{ display: flex; align-items: center; gap: 3px; color: var(--olive); font-weight: 700; }
+
+  /* ===== Trust strip ===== */
+  .trust-strip{ background: var(--bottle); color: var(--cream); padding: 28px 20px; }
+  .trust-inner{ max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .trust-item{ font-size: 13px; }
+  .trust-item .num{ font-family: 'Fraunces', serif; font-size: 24px; display: block; margin-bottom: 4px; color: var(--amber-soft); }
+  .trust-item .label{ opacity: 0.75; }
+
+  footer{ background: var(--charcoal); color: var(--cream); padding: 32px 20px; text-align: center; }
+  footer .foot-logo{ font-family: 'Fraunces', serif; font-weight: 700; font-size: 17px; margin-bottom: 8px; }
+  footer p{ font-size: 12px; opacity: 0.55; max-width: 420px; margin: 0 auto; line-height: 1.6; }
+
+  /* ===== Auth screens ===== */
+  .auth-wrap{ min-height: 100vh; background: var(--charcoal); display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .auth-card{ background: var(--cream); max-width: 380px; width: 100%; padding: 40px 28px; border-radius: 2px; border-top: 3px solid var(--amber); }
+  .auth-card .logo{ color: var(--charcoal); margin-bottom: 28px; }
+  .auth-card .logo .dot{ color: var(--amber); }
+  .auth-card h2{ font-size: 24px; margin-bottom: 8px; }
+  .auth-card .sub{ font-size: 13.5px; opacity: 0.65; margin-bottom: 24px; }
+  .field-label{ font-size: 12px; font-weight: 700; margin-bottom: 8px; display: block; opacity: 0.75; }
+  .field-input{ width: 100%; padding: 13px 14px; border: 1px solid var(--line-dark); border-radius: 2px; font-size: 15px; margin-bottom: 18px; outline: none; transition: border-color 0.15s; background: #fff; }
+  .field-input:focus{ border-color: var(--amber); }
+  .phone-input-row{ display: flex; gap: 8px; }
+  .phone-code{ width: 60px; padding: 13px 8px; border: 1px solid var(--line-dark); border-radius: 2px; font-size: 15px; text-align: center; background: #f7f5f0; flex-shrink: 0; }
+  .otp-row{ display: flex; gap: 8px; margin-bottom: 8px; }
+  .otp-digit{ width: 100%; text-align: center; padding: 13px 0; border: 1px solid var(--line-dark); border-radius: 2px; font-size: 20px; font-weight: 700; outline: none; }
+  .otp-digit:focus{ border-color: var(--amber); }
+  .otp-resend{ font-size: 12.5px; opacity: 0.6; margin: 10px 0 20px; }
+  .otp-resend button{ color: var(--amber); font-weight: 700; text-decoration: underline; }
+  .primary-btn{ width: 100%; background: var(--charcoal); color: var(--cream); padding: 15px 0; border-radius: 2px; font-size: 14px; font-weight: 700; transition: opacity 0.15s; }
+  .primary-btn:hover{ opacity: 0.88; }
+  .primary-btn:disabled{ opacity: 0.35; cursor: not-allowed; }
+  .id-upload{ border: 1.5px dashed var(--line-dark); border-radius: 2px; padding: 24px; text-align: center; margin-bottom: 18px; transition: border-color 0.15s; }
+  .id-upload.filled{ border-color: var(--olive); border-style: solid; background: rgba(138,123,79,0.06); }
+  .id-upload svg{ width: 24px; height: 24px; margin-bottom: 8px; opacity: 0.5; }
+  .id-upload p{ font-size: 12.5px; opacity: 0.6; }
+  .id-upload .filename{ font-size: 13px; font-weight: 700; color: var(--olive); margin-top: 6px; }
+  .auth-note{ font-size: 11.5px; opacity: 0.5; text-align: center; margin-top: 16px; line-height: 1.5; }
+
+  /* ===== Shop screen ===== */
+  .shop-hero{ background: linear-gradient(135deg, var(--bottle), var(--charcoal)); color: var(--cream); padding: 28px 20px 24px; }
+  .shop-hero-inner{ max-width: 900px; margin: 0 auto; }
+  .shop-hero h1{ font-size: 26px; margin: 6px 0 6px; }
+  .shop-hero-meta{ display: flex; gap: 14px; font-size: 12.5px; opacity: 0.8; flex-wrap: wrap; }
+  .shop-hero-meta span{ display: flex; align-items: center; gap: 4px; }
+
+  .shop-body{ max-width: 900px; margin: 0 auto; padding: 0 20px 100px; }
+  .shop-cats{ display: flex; gap: 8px; overflow-x: auto; padding: 18px 0; position: sticky; top: 62px; background: var(--cream); z-index: 10; scrollbar-width: none; }
+  .shop-cats::-webkit-scrollbar{ display: none; }
+
+  .product-group{ margin-bottom: 30px; }
+  .product-group h3{ font-size: 17px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--line-dark); }
+  .product-row{ display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line-dark); }
+  .product-thumb{ width: 52px; height: 52px; border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .bottle-icon{ width: 30px; height: 44px; }
+  .can-icon{ width: 26px; height: 40px; }
+  .product-info{ flex: 1; min-width: 0; }
+  .product-name{ font-size: 14.5px; font-weight: 700; }
+  .product-sub{ font-size: 12px; opacity: 0.55; margin-top: 2px; }
+  .product-price{ font-size: 14.5px; font-weight: 700; margin-top: 4px; }
+  .qty-control{ display: flex; align-items: center; gap: 0; flex-shrink: 0; }
+  .add-btn{ background: var(--charcoal); color: var(--cream); font-size: 12.5px; font-weight: 700; padding: 9px 18px; border-radius: 20px; }
+  .add-btn:hover{ opacity: 0.88; }
+  .qty-stepper{ display: flex; align-items: center; background: var(--charcoal); border-radius: 20px; overflow: hidden; }
+  .qty-stepper button{ color: var(--cream); width: 30px; height: 32px; font-size: 15px; font-weight: 700; }
+  .qty-stepper .qnum{ color: var(--cream); font-size: 13px; font-weight: 700; min-width: 18px; text-align: center; }
+
+  .cart-fab{ position: fixed; bottom: 20px; left: 20px; right: 20px; max-width: 460px; margin: 0 auto; background: var(--charcoal); color: var(--cream); padding: 15px 20px; border-radius: 40px; display: none; align-items: center; justify-content: space-between; box-shadow: 0 10px 30px rgba(0,0,0,0.35); z-index: 30; }
+  .cart-fab.visible{ display: flex; }
+  .cart-fab-left{ font-size: 13.5px; }
+  .cart-fab-left .n{ font-weight: 700; }
+  .cart-fab-right{ display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; }
+  .cart-fab-right svg{ width: 16px; height: 16px; }
+
+  /* ===== Cart screen ===== */
+  .cart-wrap{ max-width: 560px; margin: 0 auto; padding: 24px 20px 140px; }
+  .cart-item{ display: flex; align-items: center; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--line-dark); }
+  .cart-item-thumb{ width: 46px; height: 46px; border-radius: 2px; background: linear-gradient(160deg, var(--bottle-soft), var(--bottle)); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .cart-item-info{ flex: 1; min-width: 0; }
+  .cart-item-name{ font-size: 14px; font-weight: 700; }
+  .cart-item-price{ font-size: 12.5px; opacity: 0.55; margin-top: 2px; }
+  .cart-empty{ text-align: center; padding: 60px 20px; opacity: 0.55; }
+  .cart-empty svg{ width: 40px; height: 40px; margin-bottom: 14px; opacity: 0.4; }
+
+  .summary-box{ margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line-dark); }
+  .summary-row{ display: flex; justify-content: space-between; font-size: 13.5px; margin-bottom: 10px; opacity: 0.75; }
+  .summary-row.total{ font-weight: 700; font-size: 16px; opacity: 1; margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line-dark); }
+
+  .sticky-cta{ position: fixed; bottom: 0; left: 0; right: 0; background: var(--cream); border-top: 1px solid var(--line-dark); padding: 16px 20px; z-index: 30; }
+  .sticky-cta-inner{ max-width: 560px; margin: 0 auto; }
+
+  /* ===== Checkout ===== */
+  .checkout-wrap{ max-width: 560px; margin: 0 auto; padding: 24px 20px 140px; }
+  .checkout-section{ margin-bottom: 28px; }
+  .checkout-section h3{ font-size: 15px; margin-bottom: 12px; }
+  .addr-card{ border: 1px solid var(--olive); border-radius: 2px; padding: 14px 16px; background: rgba(138,123,79,0.06); font-size: 13.5px; line-height: 1.6; }
+  .pay-option{ display: flex; align-items: center; gap: 12px; border: 1px solid var(--line-dark); border-radius: 2px; padding: 14px 16px; margin-bottom: 10px; cursor: pointer; transition: border-color 0.15s; }
+  .pay-option.selected{ border-color: var(--charcoal); background: rgba(26,24,21,0.03); }
+  .pay-radio{ width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--line-dark); flex-shrink: 0; position: relative; }
+  .pay-option.selected .pay-radio{ border-color: var(--charcoal); }
+  .pay-option.selected .pay-radio::after{ content:''; position:absolute; inset: 3px; border-radius: 50%; background: var(--charcoal); }
+  .pay-label{ font-size: 14px; font-weight: 600; }
+
+  /* ===== Order tracking ===== */
+  .track-wrap{ max-width: 480px; margin: 0 auto; padding: 32px 20px 60px; }
+  .track-head{ text-align: center; margin-bottom: 36px; }
+  .track-head .eta{ font-family: 'Fraunces', serif; font-size: 40px; margin: 8px 0 4px; }
+  .track-head .sub{ font-size: 13px; opacity: 0.6; }
+  .track-steps{ position: relative; padding-left: 32px; }
+  .track-step{ position: relative; padding-bottom: 32px; }
+  .track-step:last-child{ padding-bottom: 0; }
+  .track-step::before{ content:''; position: absolute; left: -32px; top: 2px; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--line-dark); background: var(--cream); z-index: 2; }
+  .track-step::after{ content:''; position: absolute; left: -24px; top: 20px; width: 2px; height: calc(100% - 4px); background: var(--line-dark); }
+  .track-step:last-child::after{ display: none; }
+  .track-step.done::before{ border-color: var(--olive); background: var(--olive); }
+  .track-step.done::after{ background: var(--olive); }
+  .track-step.current::before{ border-color: var(--amber); background: var(--amber); box-shadow: 0 0 0 4px rgba(199,125,52,0.2); }
+  .track-step-title{ font-size: 15px; font-weight: 700; }
+  .track-step.pending .track-step-title{ opacity: 0.4; }
+  .track-step-time{ font-size: 12px; opacity: 0.5; margin-top: 3px; }
+  .order-summary-mini{ margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--line-dark); }
+  .order-summary-mini h4{ font-size: 13px; margin-bottom: 12px; opacity: 0.6; font-weight: 700; }
+  .mini-row{ display: flex; justify-content: space-between; font-size: 13.5px; padding: 6px 0; }
+
+  @media (min-width: 640px){ .hero h1{ font-size: 46px; } }
+  @media (max-width: 500px){
+    .trust-inner{ grid-template-columns: 1fr; gap: 14px; text-align: left; }
+    .trust-item{ display: flex; align-items: baseline; gap: 10px; }
+    .trust-item .num{ margin-bottom: 0; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Age gate -->
+  <div class="age-gate" id="ageGate">
+    <div class="age-card">
+      <h2>Before we go in</h2>
+      <p>QuickPeg delivers alcohol. You need to be 21 or older to order in Uttarakhand. We'll check your ID on your first order.</p>
+      <div class="age-buttons">
+        <button class="age-btn no" onclick="window.location.href='https://www.google.com'">I'm under 21</button>
+        <button class="age-btn yes" onclick="document.getElementById('ageGate').classList.add('hidden')">I'm 21 or older</button>
+      </div>
+      <p class="age-fine">By continuing you confirm you meet the legal drinking age in your state.</p>
+    </div>
+  </div>
+
+  <!-- ================= HOME SCREEN ================= -->
+  <div class="screen active" id="screen-home">
+    <header>
+      <div class="header-row">
+        <div class="logo">Quick<span class="dot">Peg</span></div>
+        <div class="header-right">
+          <div class="location-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            Rudrapur, USN
+          </div>
+          <button class="icon-btn" onclick="go('cart')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            <span class="cart-badge hidden" id="cartBadgeHome">0</span>
+          </button>
+          <button class="login-btn" id="loginBtnHome" onclick="go('login')">Log in</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="hero-eyebrow">Udham Singh Nagar · delivering now</div>
+        <h1>Your evening, sorted in under 40 minutes.</h1>
+        <p>Beer, wine, spirits and mixers from licensed shops near you — ordered on your phone, at your door before the ice melts.</p>
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" placeholder="Search beer, whisky, wine, mixers…">
+          <button>Search</button>
+        </div>
+      </div>
+    </section>
+
+    <nav class="categories">
+      <div class="cat-scroll">
+        <button class="cat-pill active" onclick="selectHomeCat(this)">🍺 Beer</button>
+        <button class="cat-pill" onclick="selectHomeCat(this)">🍷 Wine</button>
+        <button class="cat-pill" onclick="selectHomeCat(this)">🥃 Spirits</button>
+        <button class="cat-pill" onclick="selectHomeCat(this)">🥤 Mixers &amp; soda</button>
+        <button class="cat-pill" onclick="selectHomeCat(this)">🧊 Ice &amp; snacks</button>
+      </div>
+    </nav>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Shops near Rudrapur</h2>
+        <span class="count">6 open now</span>
+      </div>
+      <div class="retailer-grid" id="retailerGrid"></div>
+    </section>
+
+    <section class="trust-strip">
+      <div class="trust-inner">
+        <div class="trust-item"><span class="num">21+</span><span class="label">ID checked on every first order</span></div>
+        <div class="trust-item"><span class="num">100%</span><span class="label">Licensed retail partners only</span></div>
+        <div class="trust-item"><span class="num">~35 min</span><span class="label">Average delivery time in USN</span></div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="foot-logo">QuickPeg</div>
+      <p>QuickPeg connects customers with licensed alcohol retailers for local delivery. Please drink responsibly. Available only in permitted areas of Uttarakhand.</p>
+    </footer>
+  </div>
+
+  <!-- ================= LOGIN: PHONE ================= -->
+  <div class="screen" id="screen-login">
+    <div class="auth-wrap">
+      <div class="auth-card">
+        <div class="logo">Quick<span class="dot">Peg</span></div>
+        <h2>Log in or sign up</h2>
+        <p class="sub">Enter your phone number — we'll send you a one-time code.</p>
+        <label class="field-label">Phone number</label>
+        <div class="phone-input-row" style="margin-bottom: 18px;">
+          <div class="phone-code">+91</div>
+          <input class="field-input" style="margin-bottom:0;" type="tel" maxlength="10" placeholder="98765 43210" id="phoneInput">
+        </div>
+        <button class="primary-btn" onclick="sendOtp()">Send OTP</button>
+        <p class="auth-note">By continuing, you agree to QuickPeg's Terms and confirm you're of legal drinking age.</p>
+        <p class="auth-note" id="loginError" style="color:#A8462F; display:none;"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= LOGIN: OTP ================= -->
+  <div class="screen" id="screen-otp">
+    <div class="auth-wrap">
+      <div class="auth-card">
+        <div class="logo">Quick<span class="dot">Peg</span></div>
+        <h2>Enter the code</h2>
+        <p class="sub">We sent a 4-digit code to <span id="otpPhoneDisplay" style="font-weight:700; color: var(--charcoal);"></span></p>
+        <div class="otp-row">
+          <input class="otp-digit" maxlength="1" inputmode="numeric">
+          <input class="otp-digit" maxlength="1" inputmode="numeric">
+          <input class="otp-digit" maxlength="1" inputmode="numeric">
+          <input class="otp-digit" maxlength="1" inputmode="numeric">
+        </div>
+        <div class="otp-resend">Didn't get it? <button onclick="sendOtp()">Resend code</button></div>
+        <button class="primary-btn" onclick="verifyOtp()">Verify</button>
+        <p class="auth-note" id="otpError" style="color:#A8462F; display:none;"></p>
+        <p class="auth-note">This is a demo — the backend accepts 1234 as the code.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= AGE / ID VERIFY ================= -->
+  <div class="screen" id="screen-age-verify">
+    <div class="auth-wrap">
+      <div class="auth-card">
+        <div class="logo">Quick<span class="dot">Peg</span></div>
+        <h2>Verify your age</h2>
+        <p class="sub">Required once, before your first order. This keeps QuickPeg compliant with excise rules.</p>
+        <label class="field-label">Date of birth</label>
+        <input class="field-input" type="date" id="dobInput" style="margin-bottom: 24px;">
+        <button class="primary-btn" onclick="submitAgeVerification()">Confirm &amp; continue</button>
+        <p class="auth-note" id="ageError" style="color:#A8462F; display:none;"></p>
+        <p class="auth-note">We may ask for ID at your door if age is in question. False information can result in your account being blocked.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= SHOP SCREEN ================= -->
+  <div class="screen" id="screen-shop">
+    <header>
+      <div class="header-row">
+        <button class="back-btn" onclick="go('home')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+          Back
+        </button>
+        <button class="icon-btn" onclick="go('cart')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <span class="cart-badge hidden" id="cartBadgeShop">0</span>
+        </button>
+      </div>
+    </header>
+    <div class="shop-hero">
+      <div class="shop-hero-inner">
+        <div style="font-size:12px; opacity:0.7;">Civil Lines, Rudrapur</div>
+        <h1 id="shopName">The Vintage Cellar</h1>
+        <div class="shop-hero-meta">
+          <span>★ 4.8 rating</span>
+          <span>·</span>
+          <span>20–30 min delivery</span>
+          <span>·</span>
+          <span>Licensed retailer</span>
+        </div>
+      </div>
+    </div>
+    <div class="shop-body">
+      <div class="shop-cats">
+        <button class="cat-pill" onclick="selectShopCat(this,'All')">All</button>
+        <button class="cat-pill active" onclick="selectShopCat(this,'Beer')">🍺 Beer</button>
+        <button class="cat-pill" onclick="selectShopCat(this,'Wine')">🍷 Wine</button>
+        <button class="cat-pill" onclick="selectShopCat(this,'Spirits')">🥃 Spirits</button>
+        <button class="cat-pill" onclick="selectShopCat(this,'Mixers')">🥤 Mixers</button>
+      </div>
+      <div id="productGroups"></div>
+    </div>
+    <div class="cart-fab" id="cartFab" onclick="go('cart')">
+      <div class="cart-fab-left"><span class="n" id="fabCount">0</span> items</div>
+      <div class="cart-fab-right">View cart
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= CART SCREEN ================= -->
+  <div class="screen" id="screen-cart">
+    <header>
+      <div class="header-row">
+        <button class="back-btn" onclick="go('shop')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+          Back
+        </button>
+        <div class="logo" style="font-size:17px;">Your cart</div>
+        <div style="width:36px;"></div>
+      </div>
+    </header>
+    <div class="cart-wrap" id="cartWrap"></div>
+    <div class="sticky-cta" id="cartCta" style="display:none;">
+      <div class="sticky-cta-inner">
+        <button class="primary-btn" onclick="go('checkout')">Proceed to checkout — ₹<span id="cartCtaTotal">0</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= CHECKOUT SCREEN ================= -->
+  <div class="screen" id="screen-checkout">
+    <header>
+      <div class="header-row">
+        <button class="back-btn" onclick="go('cart')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+          Back
+        </button>
+        <div class="logo" style="font-size:17px;">Checkout</div>
+        <div style="width:36px;"></div>
+      </div>
+    </header>
+    <div class="checkout-wrap">
+      <div class="checkout-section">
+        <h3>Delivery address</h3>
+        <div class="addr-card">
+          <strong>Home</strong><br>
+          House 14, Nehru Colony, Rudrapur,<br>
+          Udham Singh Nagar, Uttarakhand 263153
+        </div>
+      </div>
+      <div class="checkout-section">
+        <h3>Payment method</h3>
+        <div class="pay-option selected" onclick="selectPay(this, 'UPI')">
+          <div class="pay-radio"></div>
+          <div class="pay-label">UPI — Google Pay / PhonePe</div>
+        </div>
+        <div class="pay-option" onclick="selectPay(this, 'Card')">
+          <div class="pay-radio"></div>
+          <div class="pay-label">Credit / debit card</div>
+        </div>
+        <div class="pay-option" onclick="selectPay(this, 'COD')">
+          <div class="pay-radio"></div>
+          <div class="pay-label">Cash on delivery</div>
+        </div>
+      </div>
+      <div class="checkout-section">
+        <h3>Order summary</h3>
+        <div class="summary-box" id="checkoutSummary"></div>
+      </div>
+    </div>
+    <div class="sticky-cta">
+      <div class="sticky-cta-inner">
+        <button class="primary-btn" onclick="placeOrder()">Place order — ₹<span id="checkoutCtaTotal">0</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ORDER TRACKING ================= -->
+  <div class="screen" id="screen-track">
+    <header>
+      <div class="header-row">
+        <div class="logo">Quick<span class="dot">Peg</span></div>
+        <button class="login-btn" onclick="resetToHome()">Done</button>
+      </div>
+    </header>
+    <div class="track-wrap">
+      <div class="track-head">
+        <div style="font-size:13px; opacity:0.6;">Order #QP-8841</div>
+        <div class="eta" id="trackEta">32 min</div>
+        <div class="sub">Estimated delivery to Nehru Colony</div>
+      </div>
+      <div class="track-steps" id="trackSteps"></div>
+      <div class="order-summary-mini">
+        <h4>Order details</h4>
+        <div id="trackItemsSummary"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ===== Backend connection =====
+  // Point this at wherever the QuickPeg backend server is running.
+  // For local testing both the backend and this app need to be reachable at this address.
+  const API_BASE = 'https://quickpeg-backend.onrender.com';
+  let ws = null;
+  let session = { customerId: null, phone: null, retailerId: null, orderId: null };
+
+  async function api(method, path, body){
+    const res = await fetch(API_BASE + path, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok){ throw new Error(data.error || 'Request failed'); }
+    return data;
+  }
+
+  function connectSocket(){
+    try{
+      ws = new WebSocket(API_BASE.replace('http','ws'));
+      ws.onmessage = (evt) => {
+        const msg = JSON.parse(evt.data);
+        if(msg.type === 'status_update' && msg.order && msg.order.id === session.orderId){
+          applyLiveOrderStatus(msg.order);
+        }
+      };
+    } catch(e){ console.warn('WebSocket unavailable, falling back to polling', e); }
+  }
+
+  // ===== State =====
+  let cart = {}; // id -> {name, price, qty, emoji}
+  let currentScreen = 'home';
+
+  function go(screenName){
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + screenName).classList.add('active');
+    currentScreen = screenName;
+    window.scrollTo(0,0);
+    if(screenName === 'checkout') renderCheckoutSummary();
+    if(screenName === 'track') startTracking();
+  }
+
+  function resetToHome(){
+    cart = {};
+    updateCartUI();
+    go('home');
+  }
+
+  // ===== Retailers (home) -- loaded live from the backend =====
+  let retailers = [];
+  const grid = document.getElementById('retailerGrid');
+
+  async function loadRetailers(){
+    try{
+      const data = await api('GET', '/api/retailers');
+      retailers = data.retailers.map(r => ({
+        id: r.id, name: r.name, area: r.address, rating: 4.7, time: '20–30 min',
+        tag: r.is_open ? null : 'Closed', isOpen: !!r.is_open
+      }));
+    } catch(e){
+      console.warn('Could not reach backend, showing empty state', e);
+      retailers = [];
+    }
+    renderRetailers();
+  }
+
+  function renderRetailers(){
+    if(retailers.length === 0){
+      grid.innerHTML = `<p style="opacity:0.5; font-size:13px; padding: 12px 4px;">No stores available right now. Make sure the QuickPeg backend server is running.</p>`;
+      return;
+    }
+    grid.innerHTML = retailers.map(r => `
+      <a class="retailer-card" href="#" onclick="event.preventDefault(); openShop('${r.id}');">
+        <div class="retailer-img">${r.name}${r.tag ? `<span class="badge">${r.tag}</span>` : ''}</div>
+        <div class="retailer-body">
+          <div class="retailer-name">${r.name}</div>
+          <div style="font-size:12.5px; opacity:0.6;">${r.area || ''}</div>
+          <div class="retailer-meta"><span class="rating">★ ${r.rating}</span><span>·</span><span>${r.time}</span></div>
+        </div>
+      </a>
+    `).join('');
+  }
+  loadRetailers();
+
+  async function openShop(retailerId){
+    const r = retailers.find(x => x.id === retailerId);
+    if(!r) return;
+    session.retailerId = retailerId;
+    document.getElementById('shopName').textContent = r.name;
+    await loadProducts(retailerId);
+    go('shop');
+  }
+
+  function selectHomeCat(el){
+    document.querySelectorAll('.cat-scroll .cat-pill').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    const grid = document.querySelector('.retailer-grid') || document.getElementById('retailerGrid');
+    if(grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ===== Products (shop) -- loaded live from the backend =====
+  let products = {}; // category -> array of product objects, refilled on each shop visit
+
+  async function loadProducts(retailerId){
+    try{
+      const data = await api('GET', `/api/retailers/${retailerId}/products`);
+      products = {};
+      data.products.forEach(p => {
+        if(!p.in_stock) return; // out-of-stock items are hidden from the customer view
+        if(!products[p.category]) products[p.category] = [];
+        products[p.category].push({
+          id: p.id, name: p.name, sub: '', price: p.price, kind: p.kind, tone: p.tone, cap: p.cap
+        });
+      });
+    } catch(e){
+      console.warn('Could not load products', e);
+      products = {};
+    }
+    activeCat = 'All';
+    renderProducts();
+  }
+
+  function bottleSVG(p){
+    if(p.kind === 'can'){
+      return `<svg class="can-icon" viewBox="0 0 40 60" xmlns="http://www.w3.org/2000/svg">
+        <rect x="6" y="6" width="28" height="48" rx="4" fill="${p.tone}" stroke="#1A1815" stroke-width="1.2"/>
+        <rect x="6" y="6" width="28" height="8" rx="4" fill="${p.cap}"/>
+        <ellipse cx="20" cy="10" rx="6" ry="2.2" fill="#1A1815" opacity="0.25"/>
+        <rect x="10" y="24" width="20" height="10" fill="#1A1815" opacity="0.08"/>
+      </svg>`;
+    }
+    if(p.kind === 'wine'){
+      return `<svg class="bottle-icon" viewBox="0 0 40 60" xmlns="http://www.w3.org/2000/svg">
+        <rect x="17" y="2" width="6" height="12" fill="${p.cap}"/>
+        <path d="M17 12 L17 20 L11 30 L11 56 Q11 58 13 58 L27 58 Q29 58 29 56 L29 30 L23 20 L23 12 Z" fill="${p.tone}" stroke="#1A1815" stroke-width="1"/>
+        <rect x="12" y="38" width="16" height="10" fill="#F2EEE6" opacity="0.85"/>
+      </svg>`;
+    }
+    if(p.kind === 'spirit'){
+      return `<svg class="bottle-icon" viewBox="0 0 40 60" xmlns="http://www.w3.org/2000/svg">
+        <rect x="16" y="3" width="8" height="10" fill="${p.cap}"/>
+        <path d="M16 13 L16 22 Q12 26 12 32 L12 55 Q12 58 15 58 L25 58 Q28 58 28 55 L28 32 Q28 26 24 22 L24 13 Z" fill="${p.tone}" stroke="#1A1815" stroke-width="1"/>
+        <rect x="13.5" y="36" width="13" height="9" fill="#F2EEE6" opacity="0.85"/>
+      </svg>`;
+    }
+    return `<svg class="bottle-icon" viewBox="0 0 40 60" xmlns="http://www.w3.org/2000/svg">
+      <rect x="17" y="2" width="6" height="8" fill="${p.cap}"/>
+      <path d="M17 10 L17 18 L13 26 L13 56 Q13 58 15 58 L25 58 Q27 58 27 56 L27 26 L23 18 L23 10 Z" fill="${p.tone}" stroke="#1A1815" stroke-width="1"/>
+      <rect x="14" y="34" width="12" height="8" fill="#F2EEE6" opacity="0.8"/>
+    </svg>`;
+  }
+
+  let activeCat = 'All';
+
+  function renderProducts(){
+    const container = document.getElementById('productGroups');
+    if(Object.keys(products).length === 0){
+      container.innerHTML = `<p style="opacity:0.5; font-size:13px; padding: 20px 4px;">No products loaded yet.</p>`;
+      return;
+    }
+    const cats = activeCat === 'All' ? Object.keys(products) : [activeCat];
+    container.innerHTML = cats.filter(cat => products[cat]).map(cat => `
+      <div class="product-group">
+        <h3>${cat}</h3>
+        ${products[cat].map(p => `
+          <div class="product-row">
+            <div class="product-thumb">${bottleSVG(p)}</div>
+            <div class="product-info">
+              <div class="product-name">${p.name}</div>
+              <div class="product-sub">${p.sub}</div>
+              <div class="product-price">₹${p.price}</div>
+            </div>
+            <div class="qty-control" id="qty-${p.id}">
+              <button class="add-btn" onclick="addToCart('${p.id}')">Add</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `).join('');
+  }
+
+  function selectShopCat(el, cat){
+    activeCat = cat;
+    document.querySelectorAll('#screen-shop .cat-pill').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    renderProducts();
+  }
+
+  function findProduct(id){
+    for(const cat in products){
+      const found = products[cat].find(p => p.id === id);
+      if(found) return found;
+    }
+  }
+
+  function addToCart(id){
+    const p = findProduct(id);
+    if(!cart[id]) cart[id] = { ...p, qty: 0 };
+    cart[id].qty += 1;
+    renderQtyControl(id);
+    updateCartUI();
+  }
+  function decrementCart(id){
+    if(!cart[id]) return;
+    cart[id].qty -= 1;
+    if(cart[id].qty <= 0) delete cart[id];
+    renderQtyControl(id);
+    updateCartUI();
+  }
+  function renderQtyControl(id){
+    const el = document.getElementById('qty-' + id);
+    if(!el) return;
+    if(cart[id] && cart[id].qty > 0){
+      el.innerHTML = `
+        <div class="qty-stepper">
+          <button onclick="decrementCart('${id}')">−</button>
+          <span class="qnum">${cart[id].qty}</span>
+          <button onclick="addToCart('${id}')">+</button>
+        </div>`;
+    } else {
+      el.innerHTML = `<button class="add-btn" onclick="addToCart('${id}')">Add</button>`;
+    }
+  }
+
+  function cartCount(){ return Object.values(cart).reduce((s,i)=>s+i.qty,0); }
+  function cartSubtotal(){ return Object.values(cart).reduce((s,i)=>s+i.qty*i.price,0); }
+
+  function updateCartUI(){
+    const count = cartCount();
+    const subtotal = cartSubtotal();
+    ['cartBadgeHome','cartBadgeShop'].forEach(id => {
+      const el = document.getElementById(id);
+      if(count > 0){ el.textContent = count; el.classList.remove('hidden'); }
+      else { el.classList.add('hidden'); }
+    });
+    const fab = document.getElementById('cartFab');
+    if(count > 0){ fab.classList.add('visible'); document.getElementById('fabCount').textContent = count; }
+    else { fab.classList.remove('visible'); }
+    renderCart();
+  }
+
+  function renderCart(){
+    const wrap = document.getElementById('cartWrap');
+    const cta = document.getElementById('cartCta');
+    const items = Object.values(cart);
+    if(items.length === 0){
+      wrap.innerHTML = `<div class="cart-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <div>Your cart is empty</div>
+      </div>`;
+      cta.style.display = 'none';
+      return;
+    }
+    const subtotal = cartSubtotal();
+    const deliveryFee = 30;
+    const platformFee = 12;
+    const total = subtotal + deliveryFee + platformFee;
+    wrap.innerHTML = items.map(i => `
+      <div class="cart-item">
+        <div class="cart-item-thumb">${i.emoji}</div>
+        <div class="cart-item-info">
+          <div class="cart-item-name">${i.name}</div>
+          <div class="cart-item-price">₹${i.price} × ${i.qty}</div>
+        </div>
+        <div class="qty-stepper">
+          <button onclick="decrementCart('${i.id}'); renderCart();">−</button>
+          <span class="qnum">${i.qty}</span>
+          <button onclick="addToCart('${i.id}'); renderCart();">+</button>
+        </div>
+      </div>
+    `).join('') + `
+      <div class="summary-box">
+        <div class="summary-row"><span>Subtotal</span><span>₹${subtotal}</span></div>
+        <div class="summary-row"><span>Delivery fee</span><span>₹${deliveryFee}</span></div>
+        <div class="summary-row"><span>Platform fee</span><span>₹${platformFee}</span></div>
+        <div class="summary-row total"><span>Total</span><span>₹${total}</span></div>
+      </div>
+    `;
+    cta.style.display = 'block';
+    document.getElementById('cartCtaTotal').textContent = total;
+  }
+
+  function renderCheckoutSummary(){
+    const items = Object.values(cart);
+    const subtotal = cartSubtotal();
+    const deliveryFee = 30;
+    const platformFee = 12;
+    const total = subtotal + deliveryFee + platformFee;
+    document.getElementById('checkoutSummary').innerHTML = items.map(i => `
+      <div class="summary-row"><span>${i.name} × ${i.qty}</span><span>₹${i.price * i.qty}</span></div>
+    `).join('') + `
+      <div class="summary-row"><span>Delivery fee</span><span>₹${deliveryFee}</span></div>
+      <div class="summary-row"><span>Platform fee</span><span>₹${platformFee}</span></div>
+      <div class="summary-row total"><span>Total</span><span>₹${total}</span></div>
+    `;
+    document.getElementById('checkoutCtaTotal').textContent = total;
+  }
+
+  function selectPay(el, method){
+    document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    if(method) selectedPayMethod = method;
+  }
+
+  let selectedPayMethod = 'UPI';
+  async function placeOrder(){
+    if(!session.customerId){
+      alert('Please log in before placing an order.');
+      go('login');
+      return;
+    }
+    const items = Object.values(cart).map(i => ({ name: i.name, qty: i.qty, price: i.price }));
+    const subtotal = cartSubtotal();
+    const total = subtotal + 30 + 12; // delivery fee + platform fee, matches renderCheckoutSummary
+    try{
+      const data = await api('POST', '/api/orders', {
+        customer_id: session.customerId,
+        retailer_id: session.retailerId,
+        items, total,
+        payment_method: selectedPayMethod,
+        delivery_address: 'Nehru Colony, Rudrapur'
+      });
+      session.orderId = data.order.id;
+      document.getElementById('trackOrderNumber') && (document.getElementById('trackOrderNumber').textContent = data.order.order_number);
+      connectSocket();
+      if(ws){
+        ws.onopen = () => ws.send(JSON.stringify({ type: 'subscribe', channel: 'order:' + session.orderId }));
+      }
+      go('track');
+      startTracking();
+    } catch(e){
+      alert('Could not place order: ' + e.message);
+    }
+  }
+
+  // ===== Login flow -- talks to the real backend now =====
+  async function sendOtp(){
+    const phoneRaw = document.getElementById('phoneInput').value || '';
+    const phone = phoneRaw.replace(/\s/g, '');
+    const errEl = document.getElementById('loginError');
+    errEl.style.display = 'none';
+    if(phone.length < 10){
+      errEl.textContent = 'Enter a valid 10-digit mobile number.';
+      errEl.style.display = 'block';
+      return;
+    }
+    try{
+      await api('POST', '/api/otp/send', { phone });
+      session.phone = phone;
+      document.getElementById('otpPhoneDisplay').textContent = '+91 ' + phone;
+      go('otp');
+      setTimeout(() => {
+        const first = document.querySelector('#screen-otp .otp-digit');
+        if(first) first.focus();
+      }, 50);
+    } catch(e){
+      errEl.textContent = 'Could not reach QuickPeg. Check the backend is running.';
+      errEl.style.display = 'block';
+    }
+  }
+  document.querySelectorAll('.otp-digit').forEach((el, idx, list) => {
+    el.addEventListener('input', () => {
+      if(el.value.length === 1 && idx < list.length - 1) list[idx+1].focus();
+    });
+  });
+
+  async function verifyOtp(){
+    const digits = Array.from(document.querySelectorAll('#screen-otp .otp-digit')).map(d => d.value).join('');
+    const errEl = document.getElementById('otpError');
+    errEl.style.display = 'none';
+    if(digits.length < 4){
+      errEl.textContent = 'Enter all 4 digits.';
+      errEl.style.display = 'block';
+      return;
+    }
+    try{
+      await api('POST', '/api/otp/verify', { phone: session.phone, code: digits });
+      const loginRes = await api('POST', '/api/customer/login', { phone: session.phone });
+      session.customerId = loginRes.customer.id;
+      if(loginRes.customer.age_verified){
+        go('home');
+      } else {
+        go('age-verify');
+      }
+    } catch(e){
+      errEl.textContent = e.message || 'Incorrect code, try again.';
+      errEl.style.display = 'block';
+    }
+  }
+
+  async function submitAgeVerification(){
+    const dob = document.getElementById('dobInput').value;
+    const errEl = document.getElementById('ageError');
+    errEl.style.display = 'none';
+    if(!dob){
+      errEl.textContent = 'Enter your date of birth.';
+      errEl.style.display = 'block';
+      return;
+    }
+    try{
+      await api('POST', `/api/customers/${session.customerId}/verify-age`, { dob });
+      go('home');
+      document.getElementById('loginBtnHome').style.display = 'none';
+    } catch(e){
+      errEl.textContent = e.message || 'You must be 25 or older to order alcohol in Uttarakhand.';
+      errEl.style.display = 'block';
+    }
+  }
+
+  // ===== Order tracking -- reflects the order's real status from the backend =====
+  const trackStages = [
+    { key: 'placed', title: 'Order placed' },
+    { key: 'accepted', title: 'Accepted by shop' },
+    { key: 'preparing', title: 'Preparing your order' },
+    { key: 'ready', title: 'Ready, waiting for a rider' },
+    { key: 'picked_up', title: 'Rider on the way' },
+    { key: 'delivered', title: 'Delivered' },
+  ];
+  const etaByStage = { placed: '32 min', accepted: '28 min', preparing: '22 min', ready: '15 min', picked_up: '8 min', delivered: 'Delivered' };
+  let trackPollInterval;
+
+  function startTracking(){
+    document.getElementById('trackItemsSummary').innerHTML = Object.values(cart).map(i => `
+      <div class="mini-row"><span>${i.name} × ${i.qty}</span><span>₹${i.price*i.qty}</span></div>
+    `).join('');
+
+    renderTrackSteps('placed');
+
+    // Poll as a reliable fallback in case the WebSocket push is missed or unsupported
+    clearInterval(trackPollInterval);
+    trackPollInterval = setInterval(async () => {
+      if(!session.orderId) return;
+      try{
+        const data = await api('GET', `/api/orders/${session.orderId}`);
+        applyLiveOrderStatus(data.order);
+        if(data.order.status === 'delivered') clearInterval(trackPollInterval);
+      } catch(e){ /* ignore transient errors */ }
+    }, 4000);
+  }
+
+  function applyLiveOrderStatus(order){
+    renderTrackSteps(order.status);
+    const eta = document.getElementById('trackEta');
+    if(eta) eta.textContent = etaByStage[order.status] || '';
+  }
+
+  function renderTrackSteps(currentStatus){
+    const el = document.getElementById('trackSteps');
+    const currentIdx = trackStages.findIndex(s => s.key === currentStatus);
+    el.innerHTML = trackStages.map((s, i) => {
+      let cls = 'pending';
+      if(i < currentIdx) cls = 'done';
+      else if(i === currentIdx) cls = 'current';
+      return `<div class="track-step ${cls}">
+        <div class="track-step-title">${s.title}</div>
+        <div class="track-step-time">${i === currentIdx ? 'In progress' : (i < currentIdx ? 'Completed' : 'Pending')}</div>
+      </div>`;
+    }).join('');
+  }
+</script>
+
+</body>
+</html>

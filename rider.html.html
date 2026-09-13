@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickPeg Rider</title>
+<style>
+
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700&display=swap');
+
+  :root{
+    --charcoal: #1A1815;
+    --charcoal-soft: #26221D;
+    --amber: #C77D34;
+    --amber-soft: #E0A868;
+    --olive: #8A7B4F;
+    --cream: #F2EEE6;
+    --bottle: #2B3A2E;
+    --bottle-soft: #3A4D3E;
+    --line: rgba(242,238,230,0.14);
+    --line-dark: rgba(26,24,21,0.12);
+    --danger: #A8462F;
+    --ok: #4C6B4F;
+  }
+
+  *{ box-sizing: border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background: var(--charcoal);
+    color: var(--cream);
+    font-family: 'Manrope', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, .display{
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--cream);
+  }
+
+  a{ color: inherit; text-decoration: none; }
+  button{ font-family: inherit; cursor: pointer; border: none; background: none; }
+  input{ font-family: inherit; }
+
+  .screen{ display: none; min-height: 100vh; }
+  .screen.active{ display: flex; flex-direction: column; }
+
+  /* ===== Shell ===== */
+  .app-shell{
+    max-width: 480px; margin: 0 auto; min-height: 100vh;
+    background: var(--charcoal); position: relative;
+    display: flex; flex-direction: column;
+  }
+
+  /* ===== Login ===== */
+  .login-screen{
+    justify-content: center; padding: 32px 28px; gap: 0;
+  }
+  .login-mark{
+    font-family: 'Fraunces', serif; font-weight: 700; font-size: 15px;
+    color: var(--amber-soft); letter-spacing: 0.02em; margin-bottom: 6px;
+  }
+  .login-title{ font-size: 34px; line-height: 1.15; margin-bottom: 10px; max-width: 280px; }
+  .login-sub{ font-size: 14px; color: rgba(242,238,230,0.6); margin-bottom: 36px; max-width: 300px; }
+  .field-label{ font-size: 12px; color: rgba(242,238,230,0.55); margin-bottom: 7px; display:block; }
+  .field-input{
+    width: 100%; background: var(--charcoal-soft); border: 1px solid var(--line);
+    color: var(--cream); font-size: 16px; padding: 14px 16px; margin-bottom: 18px;
+  }
+  .field-input:focus{ outline: none; border-color: var(--amber); }
+  .btn-primary{
+    width: 100%; background: var(--amber); color: var(--charcoal); font-weight: 700;
+    font-size: 15px; padding: 15px 0; margin-top: 8px;
+  }
+  .btn-primary:active{ background: var(--amber-soft); }
+  .login-foot{ font-size: 12px; color: rgba(242,238,230,0.4); margin-top: 22px; text-align: center; }
+
+  /* ===== Topbar (shared across in-app screens) ===== */
+  .topbar{
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 20px; border-bottom: 1px solid var(--line);
+  }
+  .topbar-rider{ display: flex; align-items: center; gap: 10px; }
+  .rider-avatar{
+    width: 34px; height: 34px; border-radius: 50%; background: var(--olive);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif; font-weight: 600; font-size: 14px; color: var(--charcoal);
+  }
+  .rider-name{ font-size: 14px; font-weight: 600; }
+  .rider-sub{ font-size: 11px; color: rgba(242,238,230,0.5); }
+  .duty-toggle{
+    display: flex; align-items: center; gap: 8px; font-size: 12px;
+    color: rgba(242,238,230,0.6);
+  }
+  .switch{
+    width: 42px; height: 24px; background: var(--charcoal-soft); border: 1px solid var(--line);
+    border-radius: 999px; position: relative; cursor: pointer; flex-shrink: 0;
+  }
+  .switch.on{ background: var(--ok); border-color: var(--ok); }
+  .switch-knob{
+    width: 18px; height: 18px; border-radius: 50%; background: var(--cream);
+    position: absolute; top: 2px; left: 2px; transition: left 0.18s ease;
+  }
+  .switch.on .switch-knob{ left: 21px; }
+
+  /* ===== Bottom nav ===== */
+  .bottom-nav{
+    display: flex; border-top: 1px solid var(--line); background: var(--charcoal-soft);
+    position: sticky; bottom: 0;
+  }
+  .nav-btn{
+    flex: 1; padding: 12px 0 10px; text-align: center; font-size: 11px;
+    color: rgba(242,238,230,0.45); display: flex; flex-direction: column; align-items: center; gap: 5px;
+  }
+  .nav-btn.active{ color: var(--amber-soft); }
+  .nav-icon{ width: 20px; height: 20px; }
+
+  .main-scroll{ flex: 1; overflow-y: auto; padding-bottom: 12px; }
+
+  /* ===== Jobs list (offline / online states) ===== */
+  .status-banner{
+    margin: 16px 20px 0; padding: 13px 15px; font-size: 13px;
+    display: flex; align-items: center; gap: 9px;
+  }
+  .status-banner.off{ background: var(--charcoal-soft); border: 1px solid var(--line); color: rgba(242,238,230,0.6); }
+  .status-banner.on{ background: rgba(76,107,79,0.18); border: 1px solid var(--ok); color: var(--cream); }
+  .pulse-dot{
+    width: 7px; height: 7px; border-radius: 50%; background: var(--ok); flex-shrink: 0;
+    animation: pulse 1.6s infinite;
+  }
+  @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:0.35; } }
+
+  .empty-jobs{
+    text-align: center; padding: 70px 30px 30px; color: rgba(242,238,230,0.4);
+  }
+  .empty-jobs .display{ font-size: 20px; color: rgba(242,238,230,0.65); margin-bottom: 8px; }
+  .empty-jobs p{ font-size: 13px; line-height: 1.6; }
+
+  .section-label{
+    font-size: 12px; color: rgba(242,238,230,0.5); padding: 20px 20px 10px;
+  }
+
+  .job-card{
+    margin: 0 20px 12px; background: var(--charcoal-soft); border: 1px solid var(--line);
+    padding: 16px 16px 14px; animation: slideIn 0.35s ease;
+  }
+  @keyframes slideIn{ from{ opacity:0; transform: translateY(10px);} to{ opacity:1; transform: translateY(0);} }
+  .job-top{ display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .job-fare{ font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; color: var(--amber-soft); }
+  .job-dist{ font-size: 12px; color: rgba(242,238,230,0.5); text-align: right; }
+  .job-route{ display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+  .route-row{ display: flex; align-items: flex-start; gap: 10px; font-size: 13px; }
+  .route-dot{ width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+  .route-dot.pickup{ background: var(--amber); }
+  .route-dot.drop{ background: var(--bottle-soft); border: 1px solid var(--olive); }
+  .route-text b{ display: block; font-weight: 600; }
+  .route-text span{ color: rgba(242,238,230,0.5); font-size: 12px; }
+  .job-meta{ display: flex; gap: 14px; font-size: 11px; color: rgba(242,238,230,0.45); margin-bottom: 14px; }
+  .job-actions{ display: flex; gap: 10px; }
+  .btn-decline{
+    flex: 1; padding: 12px 0; border: 1px solid var(--line); color: rgba(242,238,230,0.6);
+    font-size: 13px; font-weight: 600;
+  }
+  .btn-accept{
+    flex: 2; padding: 12px 0; background: var(--amber); color: var(--charcoal);
+    font-size: 13px; font-weight: 700;
+  }
+  .job-timer{
+    height: 3px; background: var(--line); margin-top: 12px; position: relative; overflow: hidden;
+  }
+  .job-timer-fill{
+    position: absolute; inset: 0; background: var(--amber); transform-origin: left;
+    animation: shrink 18s linear forwards;
+  }
+  @keyframes shrink{ from{ transform: scaleX(1);} to{ transform: scaleX(0);} }
+
+  /* ===== Active delivery ===== */
+  .delivery-screen{ padding: 0; }
+  .map-wrap{
+    position: relative; height: 260px; background: var(--charcoal-soft);
+    border-bottom: 1px solid var(--line); overflow: hidden; flex-shrink: 0;
+  }
+  .map-svg{ width: 100%; height: 100%; display: block; }
+  .stage-pill{
+    position: absolute; top: 14px; left: 16px; background: var(--charcoal);
+    border: 1px solid var(--amber); color: var(--amber-soft); font-size: 11px;
+    font-weight: 700; padding: 7px 13px; letter-spacing: 0.02em;
+  }
+  .eta-pill{
+    position: absolute; top: 14px; right: 16px; background: var(--charcoal);
+    border: 1px solid var(--line); color: var(--cream); font-size: 11px;
+    padding: 7px 13px;
+  }
+
+  .delivery-body{ padding: 20px; flex: 1; }
+  .delivery-order-id{ font-size: 12px; color: rgba(242,238,230,0.45); margin-bottom: 4px; }
+  .delivery-fare{ font-family: 'Fraunces', serif; font-size: 26px; margin-bottom: 18px; }
+
+  .stop-card{
+    display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line);
+  }
+  .stop-card:last-of-type{ border-bottom: none; }
+  .stop-marker{
+    width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;
+  }
+  .stop-marker.pickup{ background: var(--amber); color: var(--charcoal); }
+  .stop-marker.drop{ background: var(--bottle-soft); color: var(--cream); }
+  .stop-info b{ display: block; font-size: 14px; margin-bottom: 2px; }
+  .stop-info span{ font-size: 12px; color: rgba(242,238,230,0.55); display: block; }
+  .stop-info .stop-note{ color: rgba(242,238,230,0.4); font-size: 11px; margin-top: 3px; }
+
+  .contact-row{ display: flex; gap: 10px; margin: 6px 0 4px 38px; }
+  .contact-btn{
+    flex: 1; border: 1px solid var(--line); padding: 9px 0; font-size: 12px;
+    color: rgba(242,238,230,0.7); font-weight: 600;
+  }
+
+  .verify-box{
+    background: var(--charcoal-soft); border: 1px dashed var(--olive); padding: 14px 16px;
+    margin: 16px 0; font-size: 12px; color: rgba(242,238,230,0.6);
+  }
+  .verify-box b{ color: var(--cream); display: block; margin-bottom: 4px; font-size: 13px; }
+
+  .delivery-footer{ padding: 16px 20px 20px; border-top: 1px solid var(--line); }
+  .btn-stage{
+    width: 100%; padding: 16px 0; background: var(--amber); color: var(--charcoal);
+    font-size: 15px; font-weight: 700;
+  }
+  .btn-stage.done{ background: var(--ok); color: var(--cream); }
+
+  /* ===== Earnings ===== */
+  .earn-hero{
+    padding: 26px 20px 22px; border-bottom: 1px solid var(--line);
+  }
+  .earn-hero-label{ font-size: 12px; color: rgba(242,238,230,0.5); margin-bottom: 6px; }
+  .earn-hero-amt{ font-family: 'Fraunces', serif; font-size: 40px; color: var(--amber-soft); }
+  .earn-hero-sub{ font-size: 12px; color: rgba(242,238,230,0.45); margin-top: 6px; }
+
+  .earn-stats{
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .earn-stat{ background: var(--charcoal); padding: 16px 20px; }
+  .earn-stat-num{ font-family: 'Fraunces', serif; font-size: 20px; margin-bottom: 3px; }
+  .earn-stat-lbl{ font-size: 11px; color: rgba(242,238,230,0.5); }
+
+  .earn-chart{ padding: 22px 20px 6px; }
+  .chart-bars{ display: flex; align-items: flex-end; gap: 8px; height: 90px; margin-bottom: 8px; }
+  .chart-bar{ flex: 1; background: var(--olive); position: relative; min-height: 4px; }
+  .chart-bar.today{ background: var(--amber); }
+  .chart-labels{ display: flex; gap: 8px; }
+  .chart-labels span{ flex: 1; text-align: center; font-size: 10px; color: rgba(242,238,230,0.4); }
+
+  .trip-list{ padding: 6px 20px 20px; }
+  .trip-row{
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 0; border-bottom: 1px solid var(--line);
+  }
+  .trip-row:last-child{ border-bottom: none; }
+  .trip-info b{ display: block; font-size: 13px; margin-bottom: 2px; }
+  .trip-info span{ font-size: 11px; color: rgba(242,238,230,0.45); }
+  .trip-amt{ font-family: 'Fraunces', serif; font-size: 15px; color: var(--amber-soft); }
+
+  /* ===== Profile ===== */
+  .profile-hero{ padding: 28px 20px 22px; text-align: center; border-bottom: 1px solid var(--line); }
+  .profile-avatar{
+    width: 64px; height: 64px; border-radius: 50%; background: var(--olive);
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;
+    font-family: 'Fraunces', serif; font-weight: 600; font-size: 24px; color: var(--charcoal);
+  }
+  .profile-name{ font-size: 18px; margin-bottom: 4px; }
+  .profile-vehicle{ font-size: 12px; color: rgba(242,238,230,0.5); }
+  .profile-rating{
+    display: inline-flex; align-items: center; gap: 5px; margin-top: 10px;
+    background: var(--charcoal-soft); border: 1px solid var(--line);
+    padding: 5px 12px; font-size: 12px;
+  }
+  .profile-list{ padding: 8px 20px; }
+  .profile-item{
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 15px 0; border-bottom: 1px solid var(--line); font-size: 14px;
+  }
+  .profile-item span:last-child{ color: rgba(242,238,230,0.45); font-size: 12px; }
+  .btn-logout{
+    margin: 24px 20px; width: calc(100% - 40px); padding: 14px 0;
+    border: 1px solid var(--danger); color: var(--danger); font-size: 13px; font-weight: 600;
+  }
+
+  .toast{
+    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--cream); color: var(--charcoal); padding: 12px 22px; font-size: 13px;
+    font-weight: 600; opacity: 0; pointer-events: none; transition: all 0.25s ease; z-index: 300;
+    max-width: 90%; text-align: center;
+  }
+  .toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  ::-webkit-scrollbar{ width: 0; }
+
+</style>
+</head>
+<body>
+
+<div class="app-shell" id="appShell">
+
+  <!-- ===================== LOGIN ===================== -->
+  <div class="screen active login-screen" id="screen-login">
+    <div class="login-mark">QUICKPEG RIDER</div>
+    <h1 class="login-title">Deliver with QuickPeg</h1>
+    <p class="login-sub">Sign in with your registered mobile number to start taking deliveries.</p>
+    <div>
+      <label class="field-label">Mobile number</label>
+      <input class="field-input" id="riderPhone" type="tel" placeholder="98765 43210" maxlength="10">
+      <label class="field-label">Password</label>
+      <input class="field-input" id="riderPass" type="password" placeholder="••••••••">
+      <button class="btn-primary" onclick="doRiderLogin()">Sign in</button>
+    </div>
+    <p class="login-foot">Demo: any number and password will sign you in</p>
+  </div>
+
+  <!-- ===================== HOME / JOBS ===================== -->
+  <div class="screen jobs-screen" id="screen-jobs">
+    <div class="topbar">
+      <div class="topbar-rider">
+        <div class="rider-avatar">RK</div>
+        <div>
+          <div class="rider-name">Rajesh Kumar</div>
+          <div class="rider-sub" id="jobsHeaderSub">Offline</div>
+        </div>
+      </div>
+      <div class="duty-toggle">
+        <span id="dutyLabel">Off duty</span>
+        <div class="switch" id="dutySwitch" onclick="toggleDuty()"><div class="switch-knob"></div></div>
+      </div>
+    </div>
+
+    <div class="main-scroll" id="jobsScroll">
+      <div class="status-banner off" id="statusBanner">
+        Go online to start receiving delivery requests
+      </div>
+      <div class="empty-jobs" id="emptyJobs">
+        <div class="display">You're offline</div>
+        <p>Flip the switch above when you're<br>ready to start taking orders.</p>
+      </div>
+      <div id="jobFeed"></div>
+    </div>
+
+    <div class="bottom-nav">
+      <button class="nav-btn active" onclick="showTab('jobs')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12l2-7h14l2 7M5 12v7a1 1 0 001 1h2a1 1 0 001-1v-2h6v2a1 1 0 001 1h2a1 1 0 001-1v-7M5 12h14"/></svg>
+        Jobs
+      </button>
+      <button class="nav-btn" onclick="showTab('earnings')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3v18h18M8 17V10M13 17V6M18 17v-4"/></svg>
+        Earnings
+      </button>
+      <button class="nav-btn" onclick="showTab('profile')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+        Profile
+      </button>
+    </div>
+  </div>
+
+  <!-- ===================== ACTIVE DELIVERY ===================== -->
+  <div class="screen delivery-screen" id="screen-delivery">
+    <div class="map-wrap">
+      <div class="stage-pill" id="stagePill">HEADING TO PICKUP</div>
+      <div class="eta-pill" id="etaPill">6 min away</div>
+      <svg class="map-svg" viewBox="0 0 480 260" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+            <path d="M24 0H0V24" fill="none" stroke="rgba(242,238,230,0.06)" stroke-width="1"/>
+          </pattern>
+        </defs>
+        <rect width="480" height="260" fill="#22201B"/>
+        <rect width="480" height="260" fill="url(#grid)"/>
+        <path d="M20 220 Q140 180 200 130 T 340 60" fill="none" stroke="rgba(199,125,52,0.35)" stroke-width="3" stroke-dasharray="1 10" stroke-linecap="round"/>
+        <path id="routeLine" d="M60 210 Q160 190 210 140" fill="none" stroke="#C77D34" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="60" cy="210" r="7" fill="#C77D34" stroke="#1A1815" stroke-width="2"/>
+        <circle cx="330" cy="70" r="7" fill="#4C5F4F" stroke="#1A1815" stroke-width="2"/>
+        <g id="riderMarker" transform="translate(60,210)">
+          <circle r="11" fill="#1A1815" stroke="#E0A868" stroke-width="2"/>
+          <circle r="4" fill="#E0A868"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="main-scroll">
+      <div class="delivery-body">
+        <div class="delivery-order-id">Order #QP-8841</div>
+        <div class="delivery-fare display">₹85 trip earning</div>
+
+        <div class="stop-card">
+          <div class="stop-marker pickup">P</div>
+          <div class="stop-info">
+            <b>The Vintage Cellar</b>
+            <span>Civil Lines, Rudrapur</span>
+            <span class="stop-note">Order ready for pickup · Show order ID at counter</span>
+          </div>
+        </div>
+        <div class="contact-row">
+          <button class="contact-btn">Call store</button>
+          <button class="contact-btn">Navigate</button>
+        </div>
+
+        <div class="stop-card">
+          <div class="stop-marker drop">D</div>
+          <div class="stop-info">
+            <b>Aditya Sharma</b>
+            <span>H.No 14, Nehru Colony, Rudrapur</span>
+            <span class="stop-note">Landmark: opposite Kendriya Vidyalaya gate</span>
+          </div>
+        </div>
+        <div class="contact-row">
+          <button class="contact-btn">Call customer</button>
+          <button class="contact-btn">Navigate</button>
+        </div>
+
+        <div class="verify-box" id="verifyBox">
+          <b>Age verification required at drop-off</b>
+          Ask to see a valid photo ID before handing over the order. Confirm the customer is 25 or older.
+        </div>
+      </div>
+    </div>
+
+    <div class="delivery-footer">
+      <button class="btn-stage" id="stageBtn" onclick="advanceStage()">Arrived at store</button>
+    </div>
+  </div>
+
+  <!-- ===================== EARNINGS ===================== -->
+  <div class="screen" id="screen-earnings">
+    <div class="topbar">
+      <div class="topbar-rider">
+        <div class="rider-avatar">RK</div>
+        <div>
+          <div class="rider-name">Earnings</div>
+          <div class="rider-sub">This week</div>
+        </div>
+      </div>
+    </div>
+    <div class="main-scroll">
+      <div class="earn-hero">
+        <div class="earn-hero-label">Today's earnings</div>
+        <div class="earn-hero-amt">₹740</div>
+        <div class="earn-hero-sub">From 9 deliveries · Online 5h 20m</div>
+      </div>
+      <div class="earn-stats">
+        <div class="earn-stat"><div class="earn-stat-num">₹4,960</div><div class="earn-stat-lbl">This week</div></div>
+        <div class="earn-stat"><div class="earn-stat-num">58</div><div class="earn-stat-lbl">Trips this week</div></div>
+        <div class="earn-stat"><div class="earn-stat-num">₹85.5</div><div class="earn-stat-lbl">Avg per trip</div></div>
+        <div class="earn-stat"><div class="earn-stat-num">4.9</div><div class="earn-stat-lbl">Rider rating</div></div>
+      </div>
+      <div class="earn-chart">
+        <div class="section-label" style="padding:0 0 12px;">Last 7 days</div>
+        <div class="chart-bars">
+          <div class="chart-bar" style="height:48%"></div>
+          <div class="chart-bar" style="height:62%"></div>
+          <div class="chart-bar" style="height:35%"></div>
+          <div class="chart-bar" style="height:70%"></div>
+          <div class="chart-bar" style="height:55%"></div>
+          <div class="chart-bar" style="height:80%"></div>
+          <div class="chart-bar today" style="height:44%"></div>
+        </div>
+        <div class="chart-labels">
+          <span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span><span>Mon</span><span>Tue</span>
+        </div>
+      </div>
+      <div class="section-label">Recent trips</div>
+      <div class="trip-list">
+        <div class="trip-row"><div class="trip-info"><b>The Vintage Cellar → Nehru Colony</b><span>Today, 7:42 PM</span></div><div class="trip-amt">₹85</div></div>
+        <div class="trip-row"><div class="trip-info"><b>Highland Spirits → Gandhi Nagar</b><span>Today, 6:55 PM</span></div><div class="trip-amt">₹70</div></div>
+        <div class="trip-row"><div class="trip-info"><b>The Vintage Cellar → Rampur Road</b><span>Today, 6:10 PM</span></div><div class="trip-amt">₹95</div></div>
+        <div class="trip-row"><div class="trip-info"><b>City Wine Shop → Civil Lines</b><span>Today, 5:30 PM</span></div><div class="trip-amt">₹65</div></div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <button class="nav-btn" onclick="showTab('jobs')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12l2-7h14l2 7M5 12v7a1 1 0 001 1h2a1 1 0 001-1v-2h6v2a1 1 0 001 1h2a1 1 0 001-1v-7M5 12h14"/></svg>
+        Jobs
+      </button>
+      <button class="nav-btn active" onclick="showTab('earnings')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3v18h18M8 17V10M13 17V6M18 17v-4"/></svg>
+        Earnings
+      </button>
+      <button class="nav-btn" onclick="showTab('profile')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+        Profile
+      </button>
+    </div>
+  </div>
+
+  <!-- ===================== PROFILE ===================== -->
+  <div class="screen" id="screen-profile">
+    <div class="main-scroll">
+      <div class="profile-hero">
+        <div class="profile-avatar">RK</div>
+        <div class="profile-name display">Rajesh Kumar</div>
+        <div class="profile-vehicle">Motorcycle · DL 4S AB 1234</div>
+        <div class="profile-rating">★ 4.9 rider rating</div>
+      </div>
+      <div class="profile-list">
+        <div class="profile-item"><span>Phone number</span><span>+91 98765 43210</span></div>
+        <div class="profile-item"><span>Rider ID</span><span>QP-RD-0142</span></div>
+        <div class="profile-item"><span>Vehicle type</span><span>Motorcycle</span></div>
+        <div class="profile-item"><span>Bank account</span><span>••••4821</span></div>
+        <div class="profile-item"><span>Documents</span><span>Verified</span></div>
+        <div class="profile-item"><span>Total deliveries</span><span>612</span></div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">Log out</button>
+    </div>
+    <div class="bottom-nav">
+      <button class="nav-btn" onclick="showTab('jobs')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12l2-7h14l2 7M5 12v7a1 1 0 001 1h2a1 1 0 001-1v-2h6v2a1 1 0 001 1h2a1 1 0 001-1v-7M5 12h14"/></svg>
+        Jobs
+      </button>
+      <button class="nav-btn" onclick="showTab('earnings')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3v18h18M8 17V10M13 17V6M18 17v-4"/></svg>
+        Earnings
+      </button>
+      <button class="nav-btn active" onclick="showTab('profile')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+        Profile
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+
+  // ---------- Backend connection ----------
+  const API_BASE = 'https://quickpeg-backend.onrender.com';
+  let ws = null;
+  let riderId = null;
+
+  async function api(method, path, body){
+    const res = await fetch(API_BASE + path, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok){ throw new Error(data.error || 'Request failed'); }
+    return data;
+  }
+
+  function connectSocket(){
+    try{
+      ws = new WebSocket(API_BASE.replace('http','ws'));
+      ws.onopen = () => ws.send(JSON.stringify({ type: 'subscribe', channel: 'jobs:available' }));
+      ws.onmessage = (evt) => {
+        const msg = JSON.parse(evt.data);
+        if(msg.type === 'new_job' && onDuty && !document.getElementById('activeJobCard')){
+          showJobCard(msg.order);
+        }
+      };
+    } catch(e){ console.warn('WebSocket unavailable, falling back to polling', e); }
+  }
+
+  // ---------- Navigation helpers ----------
+  function showScreen(id){
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  async function doRiderLogin(){
+    const phone = document.getElementById('riderPhone').value || '9812345678';
+    const password = document.getElementById('riderPass').value || 'demo123';
+    try{
+      const data = await api('POST', '/api/rider/login', { phone, password });
+      riderId = data.rider.id;
+      document.querySelector('.rider-name').textContent = data.rider.name;
+      connectSocket();
+      showScreen('screen-jobs');
+      showTab('jobs');
+    } catch(e){
+      alert('Login failed: ' + e.message);
+    }
+  }
+
+  async function doLogout(){
+    await goOffline();
+    if(ws) ws.close();
+    showScreen('screen-login');
+  }
+
+  function showTab(tab){
+    if(tab === 'jobs') showScreen('screen-jobs');
+    if(tab === 'earnings'){ showScreen('screen-earnings'); loadEarnings(); }
+    if(tab === 'profile') showScreen('screen-profile');
+  }
+
+  // ---------- Duty toggle & job feed ----------
+  let onDuty = false;
+  let jobPollInterval = null;
+
+  async function toggleDuty(){
+    onDuty = !onDuty;
+    document.getElementById('dutySwitch').classList.toggle('on', onDuty);
+    document.getElementById('dutyLabel').textContent = onDuty ? 'On duty' : 'Off duty';
+    document.getElementById('jobsHeaderSub').textContent = onDuty ? 'Online · searching for jobs' : 'Offline';
+
+    const banner = document.getElementById('statusBanner');
+    const empty = document.getElementById('emptyJobs');
+
+    try{ await api('PATCH', `/api/riders/${riderId}/status`, { is_online: onDuty }); }
+    catch(e){ console.warn('Could not update duty status', e); }
+
+    if(onDuty){
+      banner.className = 'status-banner on';
+      banner.innerHTML = '<span class="pulse-dot"></span> Online — looking for delivery requests nearby';
+      empty.style.display = 'none';
+      pollForJobs();
+      jobPollInterval = setInterval(pollForJobs, 5000);
+    } else {
+      await goOffline();
+    }
+  }
+
+  async function pollForJobs(){
+    if(!onDuty || document.getElementById('activeJobCard')) return;
+    try{
+      const data = await api('GET', '/api/jobs/available');
+      if(data.orders.length > 0) showJobCard(data.orders[0]);
+    } catch(e){ /* ignore transient errors */ }
+  }
+
+  async function goOffline(){
+    onDuty = false;
+    document.getElementById('dutySwitch').classList.remove('on');
+    document.getElementById('dutyLabel').textContent = 'Off duty';
+    document.getElementById('jobsHeaderSub').textContent = 'Offline';
+    const banner = document.getElementById('statusBanner');
+    banner.className = 'status-banner off';
+    banner.textContent = 'Go online to start receiving delivery requests';
+    document.getElementById('emptyJobs').style.display = 'block';
+    document.getElementById('jobFeed').innerHTML = '';
+    clearInterval(jobPollInterval);
+    try{ await api('PATCH', `/api/riders/${riderId}/status`, { is_online: false }); }
+    catch(e){ /* ignore */ }
+  }
+
+  let currentJobOrder = null;
+
+  function showJobCard(order){
+    document.getElementById('emptyJobs').style.display = 'none';
+    const items = JSON.parse(order.items_json);
+    const itemCount = items.reduce((s,i) => s + i.qty, 0);
+
+    const card = document.createElement('div');
+    card.className = 'job-card';
+    card.id = 'activeJobCard';
+    card.innerHTML = `
+      <div class="job-top">
+        <div class="job-fare">₹${order.rider_fare || 70}</div>
+        <div class="job-dist">Order #${order.order_number}</div>
+      </div>
+      <div class="job-route">
+        <div class="route-row">
+          <div class="route-dot pickup"></div>
+          <div class="route-text"><b>Pickup</b><span>Retailer store</span></div>
+        </div>
+        <div class="route-row">
+          <div class="route-dot drop"></div>
+          <div class="route-text"><b>Drop-off</b><span>${order.delivery_address || 'Customer address'}</span></div>
+        </div>
+      </div>
+      <div class="job-meta"><span>${itemCount} items</span><span>${order.payment_method || 'Online'}</span></div>
+      <div class="job-actions">
+        <button class="btn-decline" onclick="declineJob()">Decline</button>
+        <button class="btn-accept" onclick="acceptJob('${order.id}')">Accept</button>
+      </div>
+      <div class="job-timer"><div class="job-timer-fill" id="timerFill"></div></div>
+    `;
+    document.getElementById('jobFeed').innerHTML = '';
+    document.getElementById('jobFeed').appendChild(card);
+    currentJobOrder = order;
+  }
+
+  function declineJob(){
+    document.getElementById('jobFeed').innerHTML = '';
+    currentJobOrder = null;
+    if(onDuty) document.getElementById('emptyJobs').style.display = 'block';
+  }
+
+  async function acceptJob(orderId){
+    document.getElementById('jobFeed').innerHTML = '';
+    try{
+      const data = await api('POST', `/api/orders/${orderId}/claim`, { rider_id: riderId });
+      currentJobOrder = data.order;
+      resetDeliveryScreen();
+      showScreen('screen-delivery');
+      showToast('Job accepted — head to pickup');
+    } catch(e){
+      showToast('Could not claim job: ' + e.message);
+      if(onDuty) document.getElementById('emptyJobs').style.display = 'block';
+    }
+  }
+
+  // ---------- Active delivery stage flow -- pushes real status updates to the backend ----------
+  let stage = 0; // 0=heading to pickup, 1=at pickup, 2=heading to drop, 3=at drop
+  const stageConfig = [
+    { pill: 'HEADING TO PICKUP', eta: '6 min away', btn: 'Arrived at store', status: null },
+    { pill: 'AT PICKUP', eta: 'Confirm order', btn: 'Picked up order', status: null },
+    { pill: 'HEADING TO DROP-OFF', eta: '9 min away', btn: 'Arrived at drop-off', status: 'picked_up' },
+    { pill: 'AT DROP-OFF', eta: 'Verify & hand over', btn: 'Complete delivery', status: null }
+  ];
+
+  function resetDeliveryScreen(){
+    stage = 0;
+    updateStageUI();
+    document.getElementById('riderMarker').setAttribute('transform', 'translate(60,210)');
+    const orderIdEl = document.querySelector('.delivery-order-id');
+    const fareEl = document.querySelector('.delivery-fare');
+    if(currentJobOrder && orderIdEl) orderIdEl.textContent = 'Order #' + currentJobOrder.order_number;
+    if(currentJobOrder && fareEl) fareEl.textContent = '₹' + (currentJobOrder.rider_fare || 70) + ' trip earning';
+  }
+
+  function updateStageUI(){
+    const cfg = stageConfig[stage];
+    document.getElementById('stagePill').textContent = cfg.pill;
+    document.getElementById('etaPill').textContent = cfg.eta;
+    const btn = document.getElementById('stageBtn');
+    btn.textContent = cfg.btn;
+    btn.classList.toggle('done', stage === 3);
+    document.getElementById('verifyBox').style.display = (stage >= 2) ? 'block' : 'none';
+  }
+
+  async function advanceStage(){
+    if(!currentJobOrder) return;
+    if(stage < 3){
+      stage++;
+      updateStageUI();
+      const positions = ['60,210', '210,140', '270,110', '330,70'];
+      document.getElementById('riderMarker').setAttribute('transform', `translate(${positions[stage]})`);
+      if(stage === 3) showToast('Arrived — verify ID before handover');
+
+      const cfg = stageConfig[stage];
+      if(cfg.status){
+        try{ await api('PATCH', `/api/orders/${currentJobOrder.id}/status`, { status: cfg.status }); }
+        catch(e){ console.warn('Could not update order status', e); }
+      }
+    } else {
+      // delivery complete -- tell the backend so it counts toward real earnings
+      try{
+        await api('PATCH', `/api/orders/${currentJobOrder.id}/status`, { status: 'delivered' });
+        showToast(`Delivery completed — ₹${currentJobOrder.rider_fare || 70} added to today's earnings`);
+      } catch(e){
+        showToast('Could not mark delivered: ' + e.message);
+      }
+      currentJobOrder = null;
+      showScreen('screen-jobs');
+      if(onDuty) document.getElementById('emptyJobs').style.display = 'block';
+    }
+  }
+
+  // ---------- Earnings -- loaded live from the backend ----------
+  async function loadEarnings(){
+    if(!riderId) return;
+    try{
+      const data = await api('GET', `/api/riders/${riderId}/earnings`);
+      const heroAmt = document.querySelector('.earn-hero-amt');
+      const heroSub = document.querySelector('.earn-hero-sub');
+      if(heroAmt) heroAmt.textContent = '₹' + data.today.earnings;
+      if(heroSub) heroSub.textContent = `From ${data.today.trips} deliveries`;
+      const stats = document.querySelectorAll('.earn-stat-num');
+      if(stats[0]) stats[0].textContent = '₹' + data.week.earnings.toLocaleString('en-IN');
+      if(stats[1]) stats[1].textContent = data.week.trips;
+      if(stats[2]) stats[2].textContent = '₹' + data.week.avgFare;
+    } catch(e){ console.warn('Could not load earnings', e); }
+  }
+
+  // init hidden verify box on load
+  document.getElementById('verifyBox').style.display = 'none';
+
+</script>
+</body>
+</html>
