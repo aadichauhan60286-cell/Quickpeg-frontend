@@ -86,8 +86,14 @@
   .back-btn svg{ width: 16px; height: 16px; }
 
   /* ===== Hero ===== */
-  .hero{ background: var(--charcoal); color: var(--cream); padding: 40px 20px 56px; }
-  .hero-inner{ max-width: 1100px; margin: 0 auto; }
+  .hero{ background: var(--charcoal); color: var(--cream); padding: 40px 20px 56px; position: relative; overflow: hidden; }
+  .hero-bg{ position: absolute; bottom: 0; right: 0; width: 240px; height: 175px; opacity: 0.9; pointer-events: none;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 40%), linear-gradient(to bottom, transparent 0%, black 25%);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(to right, transparent 0%, black 40%), linear-gradient(to bottom, transparent 0%, black 25%);
+    mask-composite: intersect; }
+  .hero-bg svg{ width: 100%; height: 100%; }
+  .hero-inner{ max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
   .hero-eyebrow{ font-size: 13px; color: var(--amber-soft); font-weight: 600; margin-bottom: 14px; }
   .hero h1{ font-size: 34px; line-height: 1.1; max-width: 480px; margin-bottom: 16px; }
   .hero p{ font-size: 15px; opacity: 0.75; max-width: 400px; margin-bottom: 28px; }
@@ -252,6 +258,7 @@
   .mini-row{ display: flex; justify-content: space-between; font-size: 13.5px; padding: 6px 0; }
 
   @media (min-width: 640px){ .hero h1{ font-size: 46px; } }
+  @media (max-width: 420px){ .hero-bg{ width: 170px; height: 130px; } }
   @media (max-width: 500px){
     .trust-inner{ grid-template-columns: 1fr; gap: 14px; text-align: left; }
     .trust-item{ display: flex; align-items: baseline; gap: 10px; }
@@ -294,6 +301,64 @@
     </header>
 
     <section class="hero">
+      <div class="hero-bg">
+        <svg viewBox="0 0 640 400" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMaxYMid slice">
+          <defs>
+            <radialGradient id="heroGlow" cx="70%" cy="45%" r="60%">
+              <stop offset="0%" stop-color="#C77D34" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#1A1815" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="heroBottle1" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#E0A868"/>
+              <stop offset="100%" stop-color="#8A5A2A"/>
+            </linearGradient>
+            <linearGradient id="heroBottle2" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#8A7B4F"/>
+              <stop offset="100%" stop-color="#3A4D3E"/>
+            </linearGradient>
+            <linearGradient id="heroGlass" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#E0A868" stop-opacity="0.85"/>
+              <stop offset="100%" stop-color="#C77D34" stop-opacity="0.55"/>
+            </linearGradient>
+          </defs>
+          <rect width="640" height="400" fill="url(#heroGlow)"/>
+          <!-- tall bottle -->
+          <g opacity="0.92">
+            <rect x="430" y="70" width="14" height="26" rx="3" fill="#C77D34"/>
+            <path d="M430 96 L430 120 L412 148 L412 300 Q412 308 420 308 L462 308 Q470 308 470 300 L470 148 L452 120 L452 96 Z" fill="url(#heroBottle1)"/>
+            <rect x="418" y="200" width="38" height="46" rx="3" fill="#F2EEE6" opacity="0.9"/>
+          </g>
+          <!-- short spirit bottle -->
+          <g opacity="0.85">
+            <rect x="500" y="130" width="16" height="14" fill="#1A1815"/>
+            <path d="M500 144 L500 158 Q490 168 490 182 L490 296 Q490 304 498 304 L526 304 Q534 304 534 296 L534 182 Q534 168 524 158 L524 144 Z" fill="url(#heroBottle2)"/>
+            <rect x="496" y="220" width="32" height="26" rx="2" fill="#F2EEE6" opacity="0.85"/>
+          </g>
+          <!-- cocktail glass with ice + citrus -->
+          <g opacity="0.95">
+            <path d="M320 190 L392 190 L364 250 Q358 262 344 262 Q330 262 324 250 Z" fill="url(#heroGlass)"/>
+            <rect x="352" y="262" width="8" height="30" fill="#8A5A2A" opacity="0.6"/>
+            <rect x="336" y="292" width="40" height="6" rx="3" fill="#8A5A2A" opacity="0.6"/>
+            <rect x="332" y="204" width="12" height="12" rx="2" fill="#F2EEE6" opacity="0.8" transform="rotate(18 338 210)"/>
+            <rect x="356" y="212" width="10" height="10" rx="2" fill="#F2EEE6" opacity="0.7" transform="rotate(-12 361 217)"/>
+            <path d="M368 178 a10 10 0 1 0 0.1 0 Z" fill="none" stroke="#C77D34" stroke-width="3" opacity="0.7"/>
+            <circle cx="368" cy="178" r="10" fill="none" stroke="#F2EEE6" stroke-width="1.5" opacity="0.5"/>
+          </g>
+          <!-- bubbles -->
+          <circle cx="470" cy="90" r="3" fill="#F2EEE6" opacity="0.3"/>
+          <circle cx="490" cy="70" r="2" fill="#F2EEE6" opacity="0.25"/>
+          <circle cx="410" cy="60" r="2.5" fill="#F2EEE6" opacity="0.2"/>
+          <!-- snack bowl -->
+          <g opacity="0.8">
+            <path d="M540 300 Q540 330 575 330 Q610 330 610 300 Z" fill="#3A4D3E"/>
+            <circle cx="558" cy="298" r="5" fill="#C77D34" opacity="0.8"/>
+            <circle cx="575" cy="294" r="5" fill="#E0A868" opacity="0.8"/>
+            <circle cx="592" cy="299" r="5" fill="#C77D34" opacity="0.8"/>
+            <circle cx="567" cy="304" r="4" fill="#8A7B4F" opacity="0.8"/>
+            <circle cx="584" cy="305" r="4" fill="#E0A868" opacity="0.8"/>
+          </g>
+        </svg>
+      </div>
       <div class="hero-inner">
         <div class="hero-eyebrow">Udham Singh Nagar · delivering now</div>
         <h1>Your evening, sorted in under 40 minutes.</h1>
@@ -854,18 +919,159 @@
     renderProducts();
   }
 
-  const productPhotos = {
-    'Kingfisher Premium': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Kingfisher_Premium_Lager_Beer.jpg/200px-Kingfisher_Premium_Lager_Beer.jpg',
-    'Corona Extra': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e13/Corona_Extra_beer_bottle_%282019%29.png/200px-Corona_Extra_beer_bottle_%282019%29.png',
-    'Coca-Cola 750ml': 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Coca_Cola_glass_bottle_transparent.png/200px-Coca_Cola_glass_bottle_transparent.png'
-  };
-
   function bottleSVG(p){
-    const photo = productPhotos[p.name];
-    if(photo){
-      return `<img src="${photo}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;" onerror="this.parentElement.innerHTML = window.fallbackArt('${p.id}');">`;
-    }
+    const art = brandArt(p);
+    if(art) return art;
     return fallbackArt(p.id);
+  }
+
+  // Bespoke, brand-styled artwork -- original drawings that use each product's real
+  // colours, proportions and name, without tracing any company's actual logo/label art.
+  function brandArt(p){
+    const name = p && p.name;
+    switch(name){
+      case 'Kingfisher Premium':
+        return `<svg viewBox="0 0 40 60" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="kf-body" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#B0651E" stop-opacity="0.55"/>
+            <stop offset="45%" stop-color="#C77D34"/>
+            <stop offset="100%" stop-color="#7A4718" stop-opacity="0.55"/>
+          </linearGradient></defs>
+          <rect x="17" y="2" width="6" height="9" rx="1" fill="#D9B36C"/>
+          <path d="M17 11 L17 18 L13 26 L13 56 Q13 58 15 58 L25 58 Q27 58 27 56 L27 26 L23 18 L23 11 Z" fill="url(#kf-body)" stroke="#5A3410" stroke-width="0.8"/>
+          <path d="M13 33 L27 33 L27 50 Q27 52 25 52 L15 52 Q13 52 13 50 Z" fill="#A8242F"/>
+          <path d="M13 33 L27 33 L27 37 L13 37 Z" fill="#F2EEE6"/>
+          <path d="M17 41 q3 -4 6.5 -1.2 q-1 3 -3.2 3.6 q1.8 0.6 3 2.6 q-3.6 1.4 -6.3 -1.2 q-1.6 -1.6 0 -3.8 Z" fill="#3D8FA6"/>
+          <circle cx="20" cy="42.3" r="0.55" fill="#1A1815"/>
+          <text x="20" y="48.5" text-anchor="middle" font-size="4" font-weight="700" fill="#F2EEE6" font-family="Manrope, sans-serif">KINGFISHER</text>
+        </svg>`;
+      case 'Bira 91 White':
+        return `<svg viewBox="0 0 40 60" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="bira-body" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#EDEAE2" stop-opacity="0.9"/>
+            <stop offset="50%" stop-color="#F7F5EF"/>
+            <stop offset="100%" stop-color="#D8D4C8" stop-opacity="0.9"/>
+          </linearGradient></defs>
+          <rect x="6" y="6" width="28" height="48" rx="5" fill="url(#bira-body)" stroke="#1A1815" stroke-width="1"/>
+          <rect x="6" y="6" width="28" height="6" rx="3" fill="#A8462F"/>
+          <ellipse cx="20" cy="9" rx="6" ry="1.8" fill="#1A1815" opacity="0.2"/>
+          <g fill="#1A1815">
+            <path d="M20 22 l3 5 q-3 -1 -3 1.5 q0 -2.5 -3 -1.5 Z"/>
+            <circle cx="16.5" cy="29" r="4.6"/>
+            <circle cx="23.5" cy="29" r="4.6"/>
+            <path d="M16 25 Q20 21 24 25 Q22 30 20 30 Q18 30 16 25 Z" fill="#1A1815"/>
+          </g>
+          <ellipse cx="17.3" cy="28.3" rx="1.6" ry="2" fill="#F7F5EF"/>
+          <ellipse cx="22.7" cy="28.3" rx="1.6" ry="2" fill="#F7F5EF"/>
+          <circle cx="17.3" cy="28.8" r="0.6" fill="#1A1815"/>
+          <circle cx="22.7" cy="28.8" r="0.6" fill="#1A1815"/>
+          <circle cx="18.6" cy="31.2" r="0.5" fill="#1A1815"/>
+          <circle cx="21.4" cy="31.2" r="0.5" fill="#1A1815"/>
+          <rect x="17.5" y="34" width="5" height="10" rx="1.5" fill="#1A1815"/>
+          <text x="20" y="41.5" text-anchor="middle" font-size="3" font-weight="700" fill="#F7F5EF" font-family="Manrope, sans-serif">91</text>
+        </svg>`;
+      case 'Budweiser':
+        return `<svg viewBox="0 0 40 60" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="bud-body" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#8A5A2A" stop-opacity="0.65"/>
+            <stop offset="50%" stop-color="#A8703A"/>
+            <stop offset="100%" stop-color="#5C3A19" stop-opacity="0.6"/>
+          </linearGradient></defs>
+          <rect x="17" y="2" width="6" height="8" fill="#A8462F"/>
+          <path d="M17 10 L17 18 L13 26 L13 56 Q13 58 15 58 L25 58 Q27 58 27 56 L27 26 L23 18 L23 10 Z" fill="url(#bud-body)" stroke="#3A230F" stroke-width="0.8"/>
+          <path d="M15 15 L25 15 L23 20 L17 20 Z" fill="#A8462F"/>
+          <path d="M13 32 L27 32 L27 49 Q27 51 25 51 L15 51 Q13 51 13 49 Z" fill="#F2EEE6"/>
+          <path d="M13 32 L27 32 L27 36 L13 36 Z" fill="#A8462F"/>
+          <rect x="13" y="43" width="14" height="5" fill="#A8462F"/>
+          <text x="20" y="42" text-anchor="middle" font-size="4.4" font-weight="700" fill="#1E2A4A" font-family="Fraunces, serif" font-style="italic">Bud</text>
+        </svg>`;
+      case 'Corona Extra':
+        return `<svg viewBox="0 0 40 60" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="cor-body" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#D9C77A" stop-opacity="0.35"/>
+            <stop offset="50%" stop-color="#E6D9A0" stop-opacity="0.55"/>
+            <stop offset="100%" stop-color="#B8A45A" stop-opacity="0.4"/>
+          </linearGradient></defs>
+          <rect x="17" y="2" width="6" height="10" fill="#F2EEE6" opacity="0.9"/>
+          <path d="M17 12 L17 20 L13 28 L13 56 Q13 58 15 58 L25 58 Q27 58 27 56 L27 28 L23 20 L23 12 Z" fill="url(#cor-body)" stroke="#8A7B4F" stroke-width="0.8"/>
+          <rect x="13" y="34" width="14" height="12" fill="#F2EEE6"/>
+          <rect x="13" y="46" width="14" height="5" fill="#1E2A4A"/>
+          <text x="20" y="41" text-anchor="middle" font-size="4.6" font-weight="700" fill="#1E2A4A" font-family="Fraunces, serif">Corona</text>
+          <text x="20" y="45.5" text-anchor="middle" font-size="2.3" fill="#8A7B4F">EXTRA</text>
+        </svg>`;
+      case 'Blenders Pride':
+        return `<svg viewBox="0 0 40 60" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="bp-body" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#3A5A40" stop-opacity="0.6"/>
+            <stop offset="50%" stop-color="#2B3A2E"/>
+            <stop offset="100%" stop-color="#161F18" stop-opacity="0.7"/>
+          </linearGradient></defs>
+          <rect x="16" y="3" width="8" height="10" fill="#1A1815"/>
+          <path d="M16 13 L16 22 Q12 26 12 32 L12 55 Q12 58 15 58 L25 58 Q28 58 28 55 L28 32 Q28 26 24 22 L24 13 Z" fill="url(#bp-body)" stroke="#0E0E0C" stroke-width="0.8"/>
+          <path d="M13.5 36 L26.5 36 L26.5 50 Q26.5 51.5 25 51.5 L15 51.5 Q13.5 51.5 13.5 50 Z" fill="#1A1815"/>
+          <rect x="13.5" y="36" width="13" height="2" fill="#C77D34"/>
+          <rect x="13.5" y="49.5" width="13" height="2" fill="#C77D34"/>
+          <text x="20" y="42.5" text-anchor="middle" font-size="3.1" font-weight="700" fill="#E0A868" font-family="Manrope, sans-serif">BLENDERS</text>
+          <text x="20" y="46.5" text-anchor="middle" font-size="3.4" font-weight="700" fill="#F2EEE6" font-family="Fraunces, serif">PRIDE</text>
+        </svg>`;
+      case 'Old Monk Rum':
+        return `<svg viewBox="0 0 40 60" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="om-body" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#3A2320" stop-opacity="0.7"/>
+            <stop offset="50%" stop-color="#231311"/>
+            <stop offset="100%" stop-color="#120a09" stop-opacity="0.8"/>
+          </linearGradient></defs>
+          <rect x="16" y="3" width="8" height="9" fill="#1A1815"/>
+          <path d="M16 12 L16 21 Q12 25 12 31 L12 55 Q12 58 15 58 L25 58 Q28 58 28 55 L28 31 Q28 25 24 21 L24 12 Z" fill="url(#om-body)" stroke="#000" stroke-width="0.8"/>
+          <ellipse cx="20" cy="38" rx="7.5" ry="8.5" fill="#A8242F"/>
+          <ellipse cx="20" cy="38" rx="7.5" ry="8.5" fill="none" stroke="#E0A868" stroke-width="0.6"/>
+          <circle cx="20" cy="35.5" r="3" fill="#3A2320"/>
+          <path d="M17.3 38.5 Q20 42.5 22.7 38.5" fill="none" stroke="#3A2320" stroke-width="1.3" stroke-linecap="round"/>
+          <text x="20" y="46.5" text-anchor="middle" font-size="2.6" font-weight="700" fill="#F2EEE6" font-family="Manrope, sans-serif">OLD MONK</text>
+        </svg>`;
+      case 'Sula Rasa Shiraz':
+        return `<svg viewBox="0 0 40 60" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="rasa-body" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#241820" stop-opacity="0.75"/>
+            <stop offset="50%" stop-color="#120c10"/>
+            <stop offset="100%" stop-color="#000" stop-opacity="0.8"/>
+          </linearGradient></defs>
+          <rect x="17" y="2" width="6" height="12" fill="#1A1815"/>
+          <path d="M17 12 L17 20 L11 30 L11 56 Q11 58 13 58 L27 58 Q29 58 29 56 L29 30 L23 20 L23 12 Z" fill="url(#rasa-body)" stroke="#000" stroke-width="0.8"/>
+          <rect x="12" y="37" width="16" height="12" fill="#F2EEE6" opacity="0.95"/>
+          <text x="20" y="42.5" text-anchor="middle" font-size="4" font-weight="700" fill="#1A1815" font-family="Fraunces, serif" letter-spacing="1">RASA</text>
+          <path d="M20 44.5 l1 1.6 l1.8 0.2 l-1.3 1.3 l0.3 1.8 l-1.6 -0.9 l-1.6 0.9 l0.3 -1.8 l-1.3 -1.3 l1.8 -0.2 Z" fill="#A8462F" opacity="0.85"/>
+        </svg>`;
+      case 'Coca-Cola 750ml':
+        return `<svg viewBox="0 0 40 60" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="coke-body" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#5C2E20" stop-opacity="0.6"/>
+            <stop offset="50%" stop-color="#3A1A12"/>
+            <stop offset="100%" stop-color="#1E0F0A" stop-opacity="0.7"/>
+          </linearGradient></defs>
+          <rect x="17" y="2" width="6" height="8" fill="#A8462F"/>
+          <path d="M17 10 L17 16 Q13 20 13.5 26 Q11 29 11 34 L11 56 Q11 58 13 58 L27 58 Q29 58 29 56 L29 34 Q29 29 26.5 26 Q27 20 23 16 L23 10 Z" fill="url(#coke-body)" stroke="#0d0605" stroke-width="0.8"/>
+          <path d="M11.3 32 L28.7 32 L28.7 41 L11.3 41 Z" fill="#A8242F"/>
+          <text x="20" y="38.2" text-anchor="middle" font-size="4.2" font-weight="700" fill="#F2EEE6" font-family="Fraunces, serif" font-style="italic">Cola</text>
+        </svg>`;
+      case 'Soda Water':
+        return `<svg viewBox="0 0 40 60" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="soda-body" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#E9EEF0" stop-opacity="0.25"/>
+            <stop offset="50%" stop-color="#DCE4E6" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#B8C4C6" stop-opacity="0.3"/>
+          </linearGradient></defs>
+          <rect x="17" y="2" width="6" height="8" fill="#DCE4E6" opacity="0.9"/>
+          <path d="M17 10 L17 17 Q13 20 13.5 25 Q12 27 12 31 L12 56 Q12 58 14 58 L26 58 Q28 58 28 56 L28 31 Q28 27 26.5 25 Q27 20 23 17 L23 10 Z" fill="url(#soda-body)" stroke="#7A8A8C" stroke-width="0.7"/>
+          <path d="M12.3 38 L27.7 38 L27.7 48 L12.3 48 Z" fill="#1A1815"/>
+          <text x="20" y="44.5" text-anchor="middle" font-size="3.3" font-weight="700" fill="#F2EEE6" font-family="Manrope, sans-serif">SODA</text>
+          <circle cx="17" cy="20" r="0.7" fill="#F2EEE6" opacity="0.7"/>
+          <circle cx="22" cy="28" r="0.6" fill="#F2EEE6" opacity="0.6"/>
+          <circle cx="15" cy="42" r="0.5" fill="#F2EEE6" opacity="0.5"/>
+        </svg>`;
+      default:
+        return null;
+    }
   }
 
   function fallbackArt(id){
