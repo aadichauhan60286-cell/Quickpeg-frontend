@@ -121,6 +121,21 @@
   .icon-btn{ color: var(--olive); padding: 4px 8px; font-size: 13px; font-weight: 600; }
   .icon-btn:hover{ color: var(--charcoal); }
 
+  /* ===== PRODUCT MODAL ===== */
+  .modal-overlay{ display:none; position: fixed; inset: 0; background: rgba(26,24,21,0.55); align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+  .modal-overlay.show{ display: flex; }
+  .modal-card{ background: var(--white); border-radius: 6px; padding: 26px 26px 24px; width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; }
+  .modal-card h3{ font-size: 18px; margin-bottom: 18px; }
+  .field-row{ display: flex; gap: 10px; }
+  .field-row .field{ flex: 1; }
+  .field select, .field textarea{ width: 100%; padding: 12px 14px; border: 1px solid var(--line-dark); border-radius: 3px; font-size: 14px; font-family: inherit; background: var(--cream); }
+  .field textarea{ resize: vertical; min-height: 60px; }
+  .field select:focus, .field textarea:focus{ outline: none; border-color: var(--amber); background: var(--white); }
+  .modal-actions{ display: flex; gap: 10px; margin-top: 18px; }
+  .btn-secondary{ flex: 1; background: transparent; border: 1px solid var(--line-dark); color: var(--charcoal); padding: 12px; border-radius: 3px; font-size: 14px; font-weight: 600; }
+  .modal-actions .btn-primary{ flex: 1.4; margin-top: 0; }
+  .modal-error{ font-size: 12.5px; color: var(--red); margin-top: 4px; display: none; }
+
   /* ===== EARNINGS ===== */
   .payout-card{ background: var(--white); border: 1px solid var(--line-dark); border-radius: 4px; padding: 22px; margin-bottom: 20px; }
   .payout-row{ display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
@@ -198,6 +213,52 @@
         </div>
       </div>
       <div class="content" id="viewContent"></div>
+    </div>
+  </div>
+
+  <!-- ================= ADD / EDIT PRODUCT MODAL ================= -->
+  <div class="modal-overlay" id="productModal">
+    <div class="modal-card">
+      <h3 id="productModalTitle">Add a product</h3>
+      <input type="hidden" id="pm_id">
+      <div class="field">
+        <label>Product name</label>
+        <input id="pm_name" placeholder="e.g. Kingfisher Premium">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Category</label>
+          <select id="pm_category">
+            <option>Beer</option>
+            <option>Wine</option>
+            <option>Spirits</option>
+            <option>Mixers</option>
+            <option>Snacks</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Container</label>
+          <select id="pm_kind">
+            <option value="bottle">Bottle</option>
+            <option value="can">Can</option>
+            <option value="wine">Wine bottle</option>
+            <option value="spirit">Spirit bottle</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Price (₹)</label>
+        <input id="pm_price" type="number" placeholder="e.g. 220">
+      </div>
+      <div class="field">
+        <label>Description <span style="font-weight:400;color:var(--olive);">(optional — size, notes, etc.)</span></label>
+        <textarea id="pm_description" placeholder="e.g. 650ml bottle, chilled"></textarea>
+      </div>
+      <div class="modal-error" id="pm_error"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeProductModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveProductModal()">Save product</button>
+      </div>
     </div>
   </div>
 
@@ -429,31 +490,81 @@
     catch(e){ console.warn('Could not delete product', e); }
   }
 
-  async function addProductPrompt(){
-    const name = prompt('Product name:');
-    if(!name) return;
-    const price = parseInt(prompt('Price (rupees):')) || 0;
-    const category = prompt('Category (Beer, Wine, Spirits, or Mixers):') || 'Beer';
+  function openAddProductModal(){
+    document.getElementById('productModalTitle').textContent = 'Add a product';
+    document.getElementById('pm_id').value = '';
+    document.getElementById('pm_name').value = '';
+    document.getElementById('pm_category').value = 'Beer';
+    document.getElementById('pm_kind').value = 'bottle';
+    document.getElementById('pm_price').value = '';
+    document.getElementById('pm_description').value = '';
+    document.getElementById('pm_error').style.display = 'none';
+    document.getElementById('productModal').classList.add('show');
+  }
+
+  function openEditProductModal(id){
+    const p = shopProducts.find(x => x.id === id);
+    if(!p) return;
+    document.getElementById('productModalTitle').textContent = 'Edit product';
+    document.getElementById('pm_id').value = p.id;
+    document.getElementById('pm_name').value = p.name;
+    document.getElementById('pm_category').value = p.category || 'Beer';
+    document.getElementById('pm_kind').value = p.kind || 'bottle';
+    document.getElementById('pm_price').value = p.price;
+    document.getElementById('pm_description').value = p.description || '';
+    document.getElementById('pm_error').style.display = 'none';
+    document.getElementById('productModal').classList.add('show');
+  }
+
+  function closeProductModal(){
+    document.getElementById('productModal').classList.remove('show');
+  }
+
+  async function saveProductModal(){
+    const id = document.getElementById('pm_id').value;
+    const name = document.getElementById('pm_name').value.trim();
+    const category = document.getElementById('pm_category').value;
+    const kind = document.getElementById('pm_kind').value;
+    const price = parseInt(document.getElementById('pm_price').value) || 0;
+    const description = document.getElementById('pm_description').value.trim();
+    const errEl = document.getElementById('pm_error');
+
+    if(!name || !price){
+      errEl.textContent = 'Please enter a product name and a price.';
+      errEl.style.display = 'block';
+      return;
+    }
+
     try{
-      const res = await api('POST', `/api/retailers/${retailerId}/products`, { name, price, category, kind: 'bottle' });
-      shopProducts.push({ id: res.id, name, category, price, in_stock: 1, kind: 'bottle' });
+      if(id){
+        await api('PATCH', `/api/products/${id}`, { name, category, price, description });
+        const p = shopProducts.find(x => x.id === id);
+        if(p){ p.name = name; p.category = category; p.price = price; p.description = description; }
+      } else {
+        const res = await api('POST', `/api/retailers/${retailerId}/products`, { name, category, price, kind, description });
+        shopProducts.push({ id: res.id, name, category, price, kind, description, in_stock: 1 });
+      }
+      closeProductModal();
       document.getElementById('viewContent').innerHTML = renderProductsView();
-    } catch(e){ alert('Could not add product: ' + e.message); }
+    } catch(e){
+      errEl.textContent = e.message || 'Could not save product.';
+      errEl.style.display = 'block';
+    }
   }
 
   function renderProductsView(){
     const rows = shopProducts.map(p => `
       <tr>
-        <td>${p.name}<br><span style="color:var(--olive);font-size:12px;">${p.category}</span></td>
+        <td>${p.name}<br><span style="color:var(--olive);font-size:12px;">${p.category}${p.description ? ' · ' + p.description : ''}</span></td>
         <td>₹<input class="price-input" type="number" value="${p.price}" onchange="updatePrice('${p.id}', this.value)"></td>
         <td><span class="stock-pill ${p.in_stock ? 'stock-in' : 'stock-out'}" style="cursor:pointer;" onclick="toggleStock('${p.id}')">${p.in_stock ? 'In stock' : 'Out of stock'}</span></td>
-        <td><button class="icon-btn" onclick="removeProduct('${p.id}')">Remove</button></td>
+        <td><button class="icon-btn" onclick="openEditProductModal('${p.id}')">Edit</button><button class="icon-btn" onclick="removeProduct('${p.id}')">Remove</button></td>
       </tr>
     `).join('');
     return `
       <div class="prod-toolbar">
         <div style="font-size:13.5px;color:var(--olive);">${shopProducts.length} products listed</div>
-        <button class="btn-add" onclick="addProductPrompt()">+ Add product</button>
+        <button class="btn-add" onclick="openAddProductModal()">+ Add product</button>
       </div>
       <table class="prod-table">
         <thead><tr><th>Product</th><th>Price</th><th>Availability</th><th></th></tr></thead>
