@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickPeg Owner Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --charcoal:#1A1815;
+    --amber:#C77D34;
+    --amber-soft:#E0A868;
+    --olive:#8A7B4F;
+    --cream:#F2EEE6;
+    --bottle:#2B3A2E;
+    --bottle-soft:#4C5F4F;
+    --line:#E3DDCE;
+    --line-dark:#D8D0BC;
+    --red:#B5321C;
+    --white:#FFFFFF;
+  }
+  *{ box-sizing: border-box; margin: 0; padding: 0; }
+  body{
+    font-family: 'Manrope', sans-serif;
+    background: var(--cream);
+    color: var(--charcoal);
+    min-height: 100vh;
+  }
+  h1,h2,h3{ font-family: 'Fraunces', serif; font-weight: 600; }
+  a{ text-decoration: none; color: inherit; }
+  button{ font-family: inherit; cursor: pointer; border: none; background: none; }
+
+  /* ===== LOGIN SCREEN ===== */
+  .login-wrap{ min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .login-card{ background: var(--white); width: 100%; max-width: 400px; padding: 40px 32px; border-radius: 4px; border: 1px solid var(--line-dark); }
+  .login-logo{ font-size: 24px; font-weight: 700; color: var(--charcoal); margin-bottom: 4px; }
+  .login-logo span{ color: var(--amber); }
+  .login-sub{ font-size: 13px; color: var(--olive); margin-bottom: 28px; letter-spacing: 0.02em; }
+  .field{ margin-bottom: 16px; }
+  .field label{ display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 6px; color: var(--charcoal); }
+  .field input, .field select, .field textarea{ width: 100%; padding: 12px 14px; border: 1px solid var(--line-dark); border-radius: 3px; font-size: 15px; font-family: inherit; background: var(--cream); }
+  .field input:focus, .field select:focus, .field textarea:focus{ outline: none; border-color: var(--amber); background: var(--white); }
+  .field textarea{ resize: vertical; min-height: 60px; }
+  .btn-primary{ width: 100%; background: var(--charcoal); color: var(--cream); padding: 13px; border-radius: 3px; font-size: 15px; font-weight: 600; margin-top: 8px; transition: background 0.15s; }
+  .btn-primary:hover{ background: var(--bottle); }
+  .login-foot{ font-size: 12.5px; color: var(--olive); margin-top: 18px; text-align: center; }
+  .demo-note{ font-size: 11.5px; color: var(--olive); background: var(--cream); border: 1px dashed var(--line-dark); padding: 8px 10px; border-radius: 3px; margin-top: 18px; line-height: 1.5; }
+
+  /* ===== APP SHELL ===== */
+  .app-shell{ display: none; min-height: 100vh; }
+  .app-shell.show{ display: flex; }
+
+  .sidebar{ width: 220px; flex-shrink: 0; background: var(--charcoal); color: var(--cream); min-height: 100vh; display: flex; flex-direction: column; padding: 24px 0; position: sticky; top: 0; height: 100vh; }
+  .sidebar-logo{ font-size: 19px; font-weight: 700; padding: 0 24px; margin-bottom: 4px; }
+  .sidebar-logo span{ color: var(--amber-soft); }
+  .sidebar-shop{ font-size: 12px; color: #B8AF9E; padding: 0 24px; margin-bottom: 28px; }
+  .nav-item{ display: flex; align-items: center; gap: 10px; padding: 12px 24px; font-size: 14px; font-weight: 500; color: #C9C2B2; border-left: 3px solid transparent; transition: all 0.15s; }
+  .nav-item svg{ width: 18px; height: 18px; flex-shrink: 0; }
+  .nav-item:hover{ color: var(--cream); background: rgba(255,255,255,0.04); }
+  .nav-item.active{ color: var(--white); border-left-color: var(--amber-soft); background: rgba(255,255,255,0.06); }
+  .sidebar-foot{ margin-top: auto; padding: 16px 24px 0; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px; }
+  .logout-btn{ font-size: 13px; color: #B8AF9E; }
+  .logout-btn:hover{ color: var(--cream); }
+
+  .main{ flex: 1; min-width: 0; }
+  .topbar{ background: var(--white); border-bottom: 1px solid var(--line-dark); padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .topbar h2{ font-size: 21px; }
+  .content{ padding: 28px 32px 60px; max-width: 1100px; }
+
+  /* stat cards */
+  .stat-grid{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+  .stat-card{ background: var(--white); border: 1px solid var(--line-dark); border-radius: 4px; padding: 16px 18px; }
+  .stat-label{ font-size: 12px; color: var(--olive); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 8px; }
+  .stat-value{ font-family: 'Fraunces', serif; font-size: 26px; font-weight: 600; }
+  .stat-sub{ font-size: 12px; color: var(--bottle-soft); margin-top: 4px; font-weight: 600; }
+
+  .section-head{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .section-head h3{ font-size: 17px; }
+
+  /* ===== TABLES ===== */
+  .data-table{ width: 100%; background: var(--white); border: 1px solid var(--line-dark); border-radius: 4px; border-collapse: collapse; overflow: hidden; margin-bottom: 24px; }
+  .data-table th{ text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.03em; color: var(--olive); padding: 12px 16px; border-bottom: 1px solid var(--line-dark); }
+  .data-table td{ padding: 12px 16px; font-size: 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .data-table tr:last-child td{ border-bottom: none; }
+  .pill{ font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 10px; display: inline-block; }
+  .pill-open{ background: #DCE8DD; color: var(--bottle); }
+  .pill-closed{ background: #F5DCD5; color: var(--red); }
+  .pill-status{ background: #E8E4D0; color: var(--olive); }
+  .icon-btn{ color: var(--olive); padding: 4px 8px; font-size: 13px; font-weight: 600; }
+  .icon-btn:hover{ color: var(--charcoal); }
+  .btn-add{ background: var(--charcoal); color: var(--cream); padding: 10px 18px; border-radius: 3px; font-size: 13.5px; font-weight: 600; }
+  .empty-note{ font-size: 14px; color: var(--olive); text-align: center; padding: 40px 0; }
+
+  /* ===== MODAL ===== */
+  .modal-overlay{ display:none; position: fixed; inset: 0; background: rgba(26,24,21,0.55); align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+  .modal-overlay.show{ display: flex; }
+  .modal-card{ background: var(--white); border-radius: 6px; padding: 26px 26px 24px; width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto; }
+  .modal-card h3{ font-size: 18px; margin-bottom: 18px; }
+  .field-row{ display: flex; gap: 10px; }
+  .field-row .field{ flex: 1; }
+  .modal-actions{ display: flex; gap: 10px; margin-top: 18px; }
+  .btn-secondary{ flex: 1; background: transparent; border: 1px solid var(--line-dark); color: var(--charcoal); padding: 12px; border-radius: 3px; font-size: 14px; font-weight: 600; }
+  .modal-actions .btn-primary{ flex: 1.4; margin-top: 0; }
+  .modal-error{ font-size: 12.5px; color: var(--red); margin-top: 4px; display: none; }
+
+  @media (max-width: 800px){
+    .app-shell.show{ flex-direction: column; }
+    .sidebar{ width: 100%; height: auto; position: relative; flex-direction: row; overflow-x: auto; padding: 12px 0; }
+    .sidebar-logo, .sidebar-shop, .sidebar-foot{ display: none; }
+    .nav-item{ padding: 10px 16px; border-left: none; border-bottom: 3px solid transparent; white-space: nowrap; }
+    .nav-item.active{ border-left: none; border-bottom-color: var(--amber-soft); }
+    .stat-grid{ grid-template-columns: repeat(2, 1fr); }
+    .content{ padding: 20px 16px 60px; }
+    .topbar{ padding: 14px 16px; }
+    .data-table{ font-size: 13px; }
+    .field-row{ flex-direction: column; gap: 0; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ================= LOGIN SCREEN ================= -->
+  <div class="login-wrap" id="loginScreen">
+    <div class="login-card">
+      <div class="login-logo">Quick<span>Peg</span></div>
+      <div class="login-sub">OWNER ADMIN LOGIN</div>
+      <div class="field">
+        <label>Phone number</label>
+        <input type="tel" id="loginPhone" placeholder="99999 99999" maxlength="10">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="loginPass" placeholder="••••••••">
+      </div>
+      <button class="btn-primary" onclick="doLogin()">Log in</button>
+      <div class="login-foot" id="loginError" style="display:none; color:#A8462F;"></div>
+      <div class="demo-note">This panel controls every shop on QuickPeg. Unlike the retailer/rider demo logins, this one checks your real password — keep it safe, and change it before you go live with real customers.</div>
+    </div>
+  </div>
+
+  <!-- ================= APP SHELL ================= -->
+  <div class="app-shell" id="appShell">
+    <div class="sidebar">
+      <div class="sidebar-logo">Quick<span>Peg</span></div>
+      <div class="sidebar-shop" id="sidebarAdminName">Owner</div>
+      <div class="nav-item active" data-view="overview" onclick="selectNav(this,'overview')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></svg>
+        Overview
+      </div>
+      <div class="nav-item" data-view="retailers" onclick="selectNav(this,'retailers')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"/></svg>
+        Shops
+      </div>
+      <div class="nav-item" data-view="orders" onclick="selectNav(this,'orders')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 21V9"/></svg>
+        All orders
+      </div>
+      <div class="sidebar-foot">
+        <button class="logout-btn" onclick="doLogout()">Log out</button>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="topbar">
+        <h2 id="viewTitle">Overview</h2>
+      </div>
+      <div class="content" id="viewContent"></div>
+    </div>
+  </div>
+
+  <!-- ================= ADD RETAILER MODAL ================= -->
+  <div class="modal-overlay" id="retailerModal">
+    <div class="modal-card">
+      <h3>Onboard a new shop</h3>
+      <div class="field">
+        <label>Shop name</label>
+        <input id="rm_name" placeholder="e.g. Highway Wine &amp; More">
+      </div>
+      <div class="field">
+        <label>Address</label>
+        <input id="rm_address" placeholder="e.g. Nainital Road, Rudrapur">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Registered mobile</label>
+          <input id="rm_phone" placeholder="98xxxxxxxx" maxlength="10">
+        </div>
+        <div class="field">
+          <label>Login password</label>
+          <input id="rm_password" placeholder="e.g. demo123">
+        </div>
+      </div>
+      <div class="field">
+        <label>Excise license number</label>
+        <input id="rm_license" placeholder="e.g. UK-EXC-2026-00142">
+      </div>
+      <div class="modal-error" id="rm_error"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeRetailerModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveRetailerModal()">Add shop</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ADD PRODUCT MODAL (owner side) ================= -->
+  <div class="modal-overlay" id="productModal">
+    <div class="modal-card">
+      <h3>Add a product</h3>
+      <input type="hidden" id="pm_retailer_id">
+      <div class="field" id="pm_retailer_field">
+        <label>Shop</label>
+        <select id="pm_retailer_select"></select>
+      </div>
+      <div class="field">
+        <label>Product name</label>
+        <input id="pm_name" placeholder="e.g. Kingfisher Premium">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Category</label>
+          <select id="pm_category">
+            <option>Beer</option>
+            <option>Wine</option>
+            <option>Spirits</option>
+            <option>Mixers</option>
+            <option>Snacks</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Container</label>
+          <select id="pm_kind">
+            <option value="bottle">Bottle</option>
+            <option value="can">Can</option>
+            <option value="wine">Wine bottle</option>
+            <option value="spirit">Spirit bottle</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Price (₹)</label>
+        <input id="pm_price" type="number" placeholder="e.g. 220">
+      </div>
+      <div class="field">
+        <label>Description <span style="font-weight:400;color:var(--olive);">(optional)</span></label>
+        <textarea id="pm_description" placeholder="e.g. 650ml bottle, chilled"></textarea>
+      </div>
+      <div class="modal-error" id="pm_error"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeProductModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveProductModal()">Save product</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ===== Backend connection =====
+  const API_BASE = 'https://quickpeg-backend.onrender.com';
+  let adminId = null;
+
+  async function api(method, path, body){
+    const res = await fetch(API_BASE + path, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok){ throw new Error(data.error || 'Request failed'); }
+    return data;
+  }
+
+  // ===== Auth =====
+  async function doLogin(){
+    const phone = document.getElementById('loginPhone').value;
+    const password = document.getElementById('loginPass').value;
+    const errEl = document.getElementById('loginError');
+    try{
+      const data = await api('POST', '/api/admin/login', { phone, password });
+      adminId = data.admin.id;
+      document.getElementById('sidebarAdminName').textContent = data.admin.name;
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appShell').classList.add('show');
+      renderView('overview');
+    } catch(e){
+      errEl.textContent = e.message;
+      errEl.style.display = 'block';
+    }
+  }
+  function doLogout(){
+    adminId = null;
+    document.getElementById('appShell').classList.remove('show');
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('loginPhone').value = '';
+    document.getElementById('loginPass').value = '';
+  }
+
+  // ===== Nav =====
+  const viewTitles = { overview: 'Overview', retailers: 'Shops', orders: 'All orders' };
+  function selectNav(el, view){
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('viewTitle').textContent = viewTitles[view];
+    renderView(view);
+  }
+
+  // ===== Overview =====
+  async function renderOverviewView(){
+    const el = document.getElementById('viewContent');
+    el.innerHTML = `<div class="empty-note">Loading…</div>`;
+    let d;
+    try{ d = await api('GET', '/api/admin/overview'); }
+    catch(e){ el.innerHTML = `<div class="empty-note">Could not load overview: ${e.message}</div>`; return; }
+
+    el.innerHTML = `
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">Shops</div><div class="stat-value">${d.retailers.total}</div><div class="stat-sub">${d.retailers.open} open right now</div></div>
+        <div class="stat-card"><div class="stat-label">Products listed</div><div class="stat-value">${d.products.total}</div></div>
+        <div class="stat-card"><div class="stat-label">Active orders</div><div class="stat-value">${d.activeOrders}</div><div class="stat-sub">In progress right now</div></div>
+        <div class="stat-card"><div class="stat-label">Today's revenue</div><div class="stat-value">₹${d.today.revenue.toLocaleString('en-IN')}</div><div class="stat-sub">${d.today.orders} delivered orders</div></div>
+      </div>
+      <div class="stat-grid" style="grid-template-columns: repeat(2, 1fr); max-width: 560px;">
+        <div class="stat-card"><div class="stat-label">This week</div><div class="stat-value">₹${d.week.revenue.toLocaleString('en-IN')}</div><div class="stat-sub">${d.week.orders} delivered orders</div></div>
+        <div class="stat-card"><div class="stat-label">Avg order value (week)</div><div class="stat-value">₹${d.week.orders ? Math.round(d.week.revenue / d.week.orders) : 0}</div></div>
+      </div>
+    `;
+  }
+
+  // ===== Retailers =====
+  let allRetailers = [];
+
+  async function loadRetailers(){
+    try{
+      const data = await api('GET', '/api/admin/retailers');
+      allRetailers = data.retailers;
+    } catch(e){
+      console.warn('Could not load retailers', e);
+      allRetailers = [];
+    }
+  }
+
+  function renderRetailersView(){
+    const rows = allRetailers.map(r => `
+      <tr>
+        <td><strong>${r.name}</strong><br><span style="color:var(--olive);font-size:12px;">${r.address || ''}</span></td>
+        <td>${r.phone}</td>
+        <td><span class="pill ${r.is_open ? 'pill-open' : 'pill-closed'}">${r.is_open ? 'Open' : 'Closed'}</span></td>
+        <td>${r.productCount}</td>
+        <td>${r.orderCount}</td>
+        <td><button class="icon-btn" onclick="openProductModalFor('${r.id}')">+ Product</button></td>
+      </tr>
+    `).join('');
+    return `
+      <div class="section-head">
+        <h3>${allRetailers.length} shops on QuickPeg</h3>
+        <button class="btn-add" onclick="openRetailerModal()">+ Onboard shop</button>
+      </div>
+      <table class="data-table">
+        <thead><tr><th>Shop</th><th>Phone</th><th>Status</th><th>Products</th><th>Orders</th><th></th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="6" class="empty-note">No shops yet.</td></tr>'}</tbody>
+      </table>
+    `;
+  }
+
+  function openRetailerModal(){
+    document.getElementById('rm_name').value = '';
+    document.getElementById('rm_address').value = '';
+    document.getElementById('rm_phone').value = '';
+    document.getElementById('rm_password').value = '';
+    document.getElementById('rm_license').value = '';
+    document.getElementById('rm_error').style.display = 'none';
+    document.getElementById('retailerModal').classList.add('show');
+  }
+  function closeRetailerModal(){
+    document.getElementById('retailerModal').classList.remove('show');
+  }
+  async function saveRetailerModal(){
+    const name = document.getElementById('rm_name').value.trim();
+    const address = document.getElementById('rm_address').value.trim();
+    const phone = document.getElementById('rm_phone').value.trim();
+    const password = document.getElementById('rm_password').value.trim() || 'demo123';
+    const excise_license = document.getElementById('rm_license').value.trim();
+    const errEl = document.getElementById('rm_error');
+    if(!name || !phone){
+      errEl.textContent = 'Please enter at least a shop name and phone number.';
+      errEl.style.display = 'block';
+      return;
+    }
+    try{
+      await api('POST', '/api/admin/retailers', { name, address, phone, password, excise_license });
+      closeRetailerModal();
+      await loadRetailers();
+      document.getElementById('viewContent').innerHTML = renderRetailersView();
+    } catch(e){
+      errEl.textContent = e.message || 'Could not add shop.';
+      errEl.style.display = 'block';
+    }
+  }
+
+  // ===== Product modal (owner adding to any shop) =====
+  function openProductModalFor(retailerId){
+    document.getElementById('pm_retailer_select').innerHTML = allRetailers.map(r =>
+      `<option value="${r.id}" ${r.id === retailerId ? 'selected' : ''}>${r.name}</option>`
+    ).join('');
+    document.getElementById('pm_name').value = '';
+    document.getElementById('pm_category').value = 'Beer';
+    document.getElementById('pm_kind').value = 'bottle';
+    document.getElementById('pm_price').value = '';
+    document.getElementById('pm_description').value = '';
+    document.getElementById('pm_error').style.display = 'none';
+    document.getElementById('productModal').classList.add('show');
+  }
+  function closeProductModal(){
+    document.getElementById('productModal').classList.remove('show');
+  }
+  async function saveProductModal(){
+    const retailerId = document.getElementById('pm_retailer_select').value;
+    const name = document.getElementById('pm_name').value.trim();
+    const category = document.getElementById('pm_category').value;
+    const kind = document.getElementById('pm_kind').value;
+    const price = parseInt(document.getElementById('pm_price').value) || 0;
+    const description = document.getElementById('pm_description').value.trim();
+    const errEl = document.getElementById('pm_error');
+    if(!retailerId || !name || !price){
+      errEl.textContent = 'Please choose a shop, a name, and a price.';
+      errEl.style.display = 'block';
+      return;
+    }
+    try{
+      await api('POST', `/api/retailers/${retailerId}/products`, { name, category, price, kind, description });
+      closeProductModal();
+      await loadRetailers();
+      document.getElementById('viewContent').innerHTML = renderRetailersView();
+    } catch(e){
+      errEl.textContent = e.message || 'Could not add product.';
+      errEl.style.display = 'block';
+    }
+  }
+
+  // ===== All orders =====
+  function timeAgo(iso){
+    const diffMs = Date.now() - new Date(iso.replace(' ', 'T') + 'Z').getTime();
+    const mins = Math.round(diffMs / 60000);
+    if(mins < 1) return 'Just now';
+    if(mins < 60) return mins + ' min ago';
+    const hrs = Math.round(mins / 60);
+    if(hrs < 24) return hrs + ' hr ago';
+    return Math.round(hrs / 24) + ' d ago';
+  }
+  function statusLabel(s){
+    return {
+      placed: 'New', accepted: 'Accepted', preparing: 'Preparing',
+      ready: 'Ready', picked_up: 'With rider', delivered: 'Delivered',
+      rejected: 'Rejected', cancelled: 'Cancelled'
+    }[s] || s;
+  }
+
+  async function renderOrdersView(){
+    const el = document.getElementById('viewContent');
+    el.innerHTML = `<div class="empty-note">Loading…</div>`;
+    let orders;
+    try{ orders = (await api('GET', '/api/admin/orders?limit=100')).orders; }
+    catch(e){ el.innerHTML = `<div class="empty-note">Could not load orders: ${e.message}</div>`; return; }
+
+    const rows = orders.map(o => `
+      <tr>
+        <td><strong>#${o.order_number}</strong><br><span style="color:var(--olive);font-size:12px;">${timeAgo(o.created_at)}</span></td>
+        <td>${o.retailer_name}</td>
+        <td><span class="pill pill-status">${statusLabel(o.status)}</span></td>
+        <td>₹${o.total}</td>
+      </tr>
+    `).join('');
+    el.innerHTML = `
+      <table class="data-table">
+        <thead><tr><th>Order</th><th>Shop</th><th>Status</th><th>Total</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="4" class="empty-note">No orders yet.</td></tr>'}</tbody>
+      </table>
+    `;
+  }
+
+  // ===== Master dispatcher =====
+  async function renderView(view){
+    if(view === 'overview'){ await renderOverviewView(); }
+    else if(view === 'retailers'){
+      await loadRetailers();
+      document.getElementById('viewContent').innerHTML = renderRetailersView();
+    }
+    else if(view === 'orders'){ await renderOrdersView(); }
+  }
+</script>
+</body>
+</html>
